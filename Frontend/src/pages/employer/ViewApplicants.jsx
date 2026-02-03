@@ -1,111 +1,132 @@
-import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../app/layouts/DashboardLayout";
-import { useNavigate } from "react-router-dom";
+import { getCandidateProfile } from "../../app/services/profileService";
 
 export default function ViewApplicants() {
   const navigate = useNavigate();
+  const query = new URLSearchParams(useLocation().search);
+  const jobId = query.get("jobId");
 
-  const employer = JSON.parse(localStorage.getItem("currentUser"));
+  const jobs = JSON.parse(localStorage.getItem("jobs")) || [];
+  const applications =
+    JSON.parse(localStorage.getItem("applications")) || [];
 
-  const [applications, setApplications] = useState([]);
-  const [jobs, setJobs] = useState([]);
-  const [users, setUsers] = useState([]);
+  const job = jobs.find((j) => j.id === jobId);
 
-  useEffect(() => {
-    setApplications(JSON.parse(localStorage.getItem("applications")) || []);
-    setJobs(JSON.parse(localStorage.getItem("jobs")) || []);
-    setUsers(JSON.parse(localStorage.getItem("users")) || []);
-  }, []);
-
-  // ✅ GET JOB IDS OWNED BY EMPLOYER
-  const employerJobIds = jobs
-    .filter((job) => job.employerId === employer.id)
-    .map((job) => job.id);
-
-  // ✅ GET APPLICATIONS FOR THOSE JOBS
-  const employerApplications = applications.filter((app) =>
-    employerJobIds.includes(app.jobId)
+  const jobApplications = applications.filter(
+    (a) => a.jobId === jobId
   );
 
-  const updateStatus = (applicationId, status) => {
-    const updated = applications.map((app) =>
-      app.id === applicationId ? { ...app, status } : app
+  const updateStatus = (appId, status) => {
+    const updated = applications.map((a) =>
+      a.id === appId ? { ...a, status } : a
     );
-
-    setApplications(updated);
-    localStorage.setItem("applications", JSON.stringify(updated));
+    localStorage.setItem(
+      "applications",
+      JSON.stringify(updated)
+    );
+    window.location.reload();
   };
 
-  const getJob = (id) => jobs.find((j) => j.id === id);
-  const getCandidate = (id) => users.find((u) => u.id === id);
+  if (!job) {
+    return (
+      <DashboardLayout title="Applicants">
+        <div className="bg-white p-6 rounded shadow">
+          Job not found.
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Applicants">
-      {employerApplications.length === 0 && (
-        <p className="text-gray-600">
-          No applications received yet.
-        </p>
-      )}
+      <div className="max-w-5xl mx-auto space-y-4">
 
-      <div className="space-y-4">
-        {employerApplications.map((app) => {
-          const job = getJob(app.jobId);
-          const candidate = getCandidate(app.candidateId);
+        {/* JOB HEADER */}
+        <div className="bg-white p-5 rounded shadow">
+          <h2 className="text-lg font-semibold">{job.title}</h2>
+          <p className="text-sm text-gray-600">
+            {job.companyName}
+          </p>
+        </div>
 
-          if (!job || !candidate) return null;
+        {jobApplications.length === 0 ? (
+          <div className="bg-white p-6 rounded shadow">
+            No applicants yet.
+          </div>
+        ) : (
+          jobApplications.map((app) => {
+            const profile = getCandidateProfile(app.userId);
 
-          return (
-            <div
-              key={app.id}
-              className="bg-white p-5 rounded shadow flex justify-between items-center"
-            >
-              <div>
-                <h3 className="font-semibold">
-                  {candidate.name}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Job: {job.title}
-                </p>
-                <p className="mt-1">
-                  Status: <strong>{app.status}</strong>
-                </p>
-              </div>
+            return (
+              <div
+                key={app.id}
+                className="bg-white p-5 rounded shadow"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold">
+                      {profile?.name || "Candidate"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Applied on{" "}
+                      {new Date(
+                        app.appliedAt
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    navigate(`/employer/candidate/${candidate.id}`)
-                  }
-                  className="border px-3 py-1 rounded"
-                >
-                  View Profile
-                </button>
+                  <span className="text-sm capitalize text-blue-600">
+                    {app.status}
+                  </span>
+                </div>
 
-                {app.status === "Applied" && (
-                  <>
+                <div className="flex gap-4 mt-4 text-sm">
+                  <button
+                    onClick={() =>
+                      navigate(
+                        `/employer/candidate/${app.userId}`
+                      )
+                    }
+                    className="text-blue-600 hover:underline"
+                  >
+                    View Profile
+                  </button>
+
+                  {app.status !== "shortlisted" && (
                     <button
                       onClick={() =>
-                        updateStatus(app.id, "Shortlisted")
+                        updateStatus(app.id, "shortlisted")
                       }
-                      className="bg-green-600 text-white px-3 py-1 rounded"
+                      className="text-green-600 hover:underline"
                     >
                       Shortlist
                     </button>
+                  )}
 
+                  {app.status !== "rejected" && (
                     <button
                       onClick={() =>
-                        updateStatus(app.id, "Rejected")
+                        updateStatus(app.id, "rejected")
                       }
-                      className="bg-red-600 text-white px-3 py-1 rounded"
+                      className="text-red-600 hover:underline"
                     >
                       Reject
                     </button>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
+
+        {/* BACK */}
+        <button
+          onClick={() => navigate("/employer/my-jobs")}
+          className="text-sm text-blue-600 underline"
+        >
+          ← Back to My Jobs
+        </button>
       </div>
     </DashboardLayout>
   );

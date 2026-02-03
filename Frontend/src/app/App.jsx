@@ -5,25 +5,33 @@ import Landing from "../pages/Landing";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 
-/* ---------- Jobs ---------- */
+/* ---------- Candidate ---------- */
 import Jobs from "../pages/Jobs";
 import JobDetail from "../pages/jobs/JobDetail";
-
-/* ---------- Candidate ---------- */
-import CandidateDashboard from "../pages/candidate/Dashboard";
+import ApplyJob from "../pages/candidate/ApplyJob";
 import CandidateProfile from "../pages/candidate/Profile";
 import CandidateApplications from "../pages/candidate/Applications";
 import SavedJobs from "../pages/candidate/SavedJobs";
 
 /* ---------- Employer ---------- */
 import EmployerDashboard from "../pages/employer/Dashboard";
+import EmployerProfile from "../pages/employer/Profile";
+import EmployerSubscription from "../pages/employer/Subscription";
 import PostJob from "../pages/employer/PostJob";
 import MyJobs from "../pages/employer/MyJobs";
-import ViewApplicants from "../pages/employer/ViewApplicants";
-import CandidateProfileView from "../pages/employer/CandidateProfileView";
+import ViewApplicants from "../pages/employer/MyJobs";
+import EmployerCandidateProfileView from "../pages/employer/CandidateProfileView";
 
+
+// "../pages/employer/ViewApplicants";
 /* ---------- Admin ---------- */
 import AdminDashboard from "../pages/admin/Dashboard";
+import AdminUsers from "../pages/admin/Users";
+import AdminCandidates from "../pages/admin/Candidates";
+import AdminCandidateProfile from "../pages/admin/CandidateProfile";
+import AdminJobs from "../pages/admin/Jobs";
+import AdminEmployers from "../pages/admin/Employers";
+import AdminEmployerProfile from "../pages/admin/EmployerProfile";
 
 /* ---------- Guards ---------- */
 import RequireRole from "./guards/RequireRole";
@@ -34,71 +42,37 @@ function HomeRedirect() {
 
   if (!user) return <Landing />;
 
-  if (user.role === "candidate") {
-    return <Navigate to="/jobs" replace />;
-  }
-
-  if (user.role === "employer") {
-    return <Navigate to="/employer/dashboard" replace />;
-  }
-
-  if (user.role === "admin") {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
+  if (user.role === "candidate") return <Navigate to="/jobs" replace />;
+  if (user.role === "employer") return <Navigate to="/employer/dashboard" replace />;
+  if (user.role === "admin") return <Navigate to="/admin/dashboard" replace />;
 
   return <Landing />;
-}
-
-/* ---------- Profile Completion Guard ---------- */
-function RequireProfile({ children }) {
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const fullUser = users.find((u) => u.id === currentUser?.id);
-
-  if (!fullUser) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (
-    fullUser.role === "candidate" &&
-    fullUser.profileCompleted === false
-  ) {
-    return <Navigate to="/candidate/profile" replace />;
-  }
-
-  return children;
 }
 
 export default function App() {
   return (
     <Routes>
-      {/* ---------- Home ---------- */}
+      {/* ---------- HOME ---------- */}
       <Route path="/" element={<HomeRedirect />} />
 
-      {/* ---------- Auth ---------- */}
+      {/* ---------- AUTH ---------- */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* ---------- Jobs (Candidates ONLY) ---------- */}
+      {/* ---------- PUBLIC JOB BROWSING ---------- */}
+      <Route path="/jobs" element={<Jobs />} />
+      <Route path="/jobs/:id" element={<JobDetail />} />
+
+      {/* ---------- CANDIDATE ---------- */}
       <Route
-        path="/jobs"
+        path="/candidate/apply/:id"
         element={
           <RequireRole allowedRoles={["candidate"]}>
-            <Jobs />
+            <ApplyJob />
           </RequireRole>
         }
       />
 
-      <Route
-        path="/jobs/:id"
-        element={
-          <RequireRole allowedRoles={["candidate"]}>
-            <JobDetail />
-          </RequireRole>
-        }
-      />
-
-      {/* ---------- Candidate ---------- */}
       <Route
         path="/candidate/profile"
         element={
@@ -109,23 +83,10 @@ export default function App() {
       />
 
       <Route
-        path="/candidate/dashboard"
-        element={
-          <RequireRole allowedRoles={["candidate"]}>
-            <RequireProfile>
-              <CandidateDashboard />
-            </RequireProfile>
-          </RequireRole>
-        }
-      />
-
-      <Route
         path="/candidate/applications"
         element={
           <RequireRole allowedRoles={["candidate"]}>
-            <RequireProfile>
-              <CandidateApplications />
-            </RequireProfile>
+            <CandidateApplications />
           </RequireRole>
         }
       />
@@ -134,19 +95,35 @@ export default function App() {
         path="/candidate/saved-jobs"
         element={
           <RequireRole allowedRoles={["candidate"]}>
-            <RequireProfile>
-              <SavedJobs />
-            </RequireProfile>
+            <SavedJobs />
           </RequireRole>
         }
       />
 
-      {/* ---------- Employer ---------- */}
+      {/* ---------- EMPLOYER ---------- */}
       <Route
         path="/employer/dashboard"
         element={
           <RequireRole allowedRoles={["employer"]}>
             <EmployerDashboard />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/employer/profile"
+        element={
+          <RequireRole allowedRoles={["employer"]}>
+            <EmployerProfile />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/employer/subscription"
+        element={
+          <RequireRole allowedRoles={["employer"]}>
+            <EmployerSubscription />
           </RequireRole>
         }
       />
@@ -182,12 +159,12 @@ export default function App() {
         path="/employer/candidate/:id"
         element={
           <RequireRole allowedRoles={["employer"]}>
-            <CandidateProfileView />
+            <EmployerCandidateProfileView />
           </RequireRole>
         }
       />
 
-      {/* ---------- Admin ---------- */}
+      {/* ---------- ADMIN ---------- */}
       <Route
         path="/admin/dashboard"
         element={
@@ -197,7 +174,61 @@ export default function App() {
         }
       />
 
-      {/* ---------- Fallback ---------- */}
+      <Route
+        path="/admin/users"
+        element={
+          <RequireRole allowedRoles={["admin"]}>
+            <AdminUsers />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/admin/candidates"
+        element={
+          <RequireRole allowedRoles={["admin"]}>
+            <AdminCandidates />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/admin/candidate/:id"
+        element={
+          <RequireRole allowedRoles={["admin"]}>
+            <AdminCandidateProfile />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/admin/employers"
+        element={
+          <RequireRole allowedRoles={["admin"]}>
+            <AdminEmployers />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/admin/employer/:id"
+        element={
+          <RequireRole allowedRoles={["admin"]}>
+            <AdminEmployerProfile />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/admin/jobs"
+        element={
+          <RequireRole allowedRoles={["admin"]}>
+            <AdminJobs />
+          </RequireRole>
+        }
+      />
+
+      {/* ---------- FALLBACK ---------- */}
       <Route
         path="*"
         element={

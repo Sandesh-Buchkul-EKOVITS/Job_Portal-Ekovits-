@@ -1,117 +1,164 @@
 import DashboardLayout from "../../app/layouts/DashboardLayout";
-import BackButton from "../../components/common/BackButton";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function AdminUsers() {
-  const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+  );
 
-  useEffect(() => {
-    const allUsers = JSON.parse(localStorage.getItem("users")) || [];
-    setUsers(allUsers.filter(u => u.role !== "admin"));
-  }, []);
+  if (!currentUser || currentUser.role !== "admin") {
+    return (
+      <DashboardLayout title="Users">
+        <div className="bg-white p-6 rounded shadow">
+          Access denied.
+        </div>
+      </DashboardLayout>
+    );
+  }
 
-  const saveUsers = (updated) => {
+  const [query, setQuery] = useState("");
+  const [users, setUsers] = useState(
+    JSON.parse(localStorage.getItem("users")) || []
+  );
+
+  /* ---------- SEARCH ---------- */
+  const filteredUsers = users.filter((u) => {
+    const q = query.toLowerCase();
+    return (
+      u.name?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      u.phone?.includes(q)
+    );
+  });
+
+  /* ---------- ACTIONS ---------- */
+
+  const updateUsers = (updated) => {
     setUsers(updated);
-    localStorage.setItem("users", JSON.stringify(updated));
-  };
-
-  const deleteUser = (id) => {
-    if (!window.confirm("Delete this user permanently?")) return;
-    saveUsers(users.filter(u => u.id !== id));
-  };
-
-  const resetPassword = (id) => {
-    const updated = users.map(u =>
-      u.id === id ? { ...u, password: "password123" } : u
+    localStorage.setItem(
+      "users",
+      JSON.stringify(updated)
     );
-    saveUsers(updated);
-    alert("Password reset to: password123");
   };
 
-  const changeRole = (id, role) => {
-    saveUsers(
-      users.map(u => (u.id === id ? { ...u, role } : u))
+  const resetPassword = (userId) => {
+    const tempPassword =
+      "Temp@" + Math.floor(Math.random() * 10000);
+
+    const updated = users.map((u) =>
+      u.id === userId
+        ? { ...u, password: tempPassword }
+        : u
     );
+
+    updateUsers(updated);
+    alert(
+      `Temporary password: ${tempPassword}\nPlease share securely with user.`
+    );
+  };
+
+  const toggleBlock = (userId) => {
+    const updated = users.map((u) =>
+      u.id === userId
+        ? { ...u, isBlocked: !u.isBlocked }
+        : u
+    );
+
+    updateUsers(updated);
+  };
+
+  const deleteUser = (userId) => {
+    if (
+      !window.confirm(
+        "This will permanently delete the user. Continue?"
+      )
+    )
+      return;
+
+    const updated = users.filter(
+      (u) => u.id !== userId
+    );
+
+    updateUsers(updated);
   };
 
   return (
-    <DashboardLayout title="User Management">
-      <BackButton />
+    <DashboardLayout title="All Users">
+      <div className="max-w-6xl mx-auto space-y-4">
 
-      <table className="w-full bg-white rounded shadow">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2">Name</th>
-            <th className="p-2">Email</th>
-            <th className="p-2">Role</th>
-            <th className="p-2">Actions</th>
-          </tr>
-        </thead>
+        {/* SEARCH */}
+        <input
+          placeholder="Search by name, email or phone"
+          className="border p-3 rounded w-full"
+          value={query}
+          onChange={(e) =>
+            setQuery(e.target.value)
+          }
+        />
 
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id} className="border-b">
-              <td className="p-2">{user.name}</td>
-              <td className="p-2">{user.email}</td>
-
-              <td className="p-2">
-                <select
-                  value={user.role}
-                  onChange={(e) =>
-                    changeRole(user.id, e.target.value)
-                  }
-                  className="border p-1 rounded"
-                >
-                  <option value="candidate">Candidate</option>
-                  <option value="employer">Employer</option>
-                </select>
-              </td>
-
-              <td className="p-2 flex gap-2">
-                {/* ✅ VIEW CANDIDATE PROFILE */}
-                {user.role === "candidate" && (
-                  <button
-                    onClick={() =>
-                      navigate(`/admin/candidate/${user.id}`)
-                    }
-                    className="border px-2 py-1 rounded"
-                  >
-                    View Profile
-                  </button>
+        {filteredUsers.length === 0 ? (
+          <div className="bg-white p-6 rounded shadow">
+            No users found.
+          </div>
+        ) : (
+          filteredUsers.map((user) => (
+            <div
+              key={user.id}
+              className="bg-white p-5 rounded shadow flex justify-between items-center"
+            >
+              <div>
+                <p className="font-semibold">
+                  {user.name}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {user.email}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Role: {user.role}
+                </p>
+                {user.isBlocked && (
+                  <p className="text-xs text-red-600">
+                    BLOCKED
+                  </p>
                 )}
+              </div>
 
-                {/* VIEW EMPLOYER COMPANY */}
-                {user.role === "employer" && (
-                  <button
-                    onClick={() =>
-                      navigate(`/admin/employer/${user.id}`)
-                    }
-                    className="border px-2 py-1 rounded"
-                  >
-                    View Company
-                  </button>
-                )}
-
+              <div className="flex gap-3 text-sm">
                 <button
-                  onClick={() => resetPassword(user.id)}
-                  className="bg-yellow-500 text-white px-2 py-1 rounded"
+                  onClick={() =>
+                    resetPassword(user.id)
+                  }
+                  className="text-blue-600"
                 >
                   Reset Password
                 </button>
 
                 <button
-                  onClick={() => deleteUser(user.id)}
-                  className="bg-red-600 text-white px-2 py-1 rounded"
+                  onClick={() =>
+                    toggleBlock(user.id)
+                  }
+                  className="text-yellow-600"
                 >
-                  Delete
+                  {user.isBlocked
+                    ? "Unblock"
+                    : "Block"}
                 </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+                {user.role !== "admin" && (
+                  <button
+                    onClick={() =>
+                      deleteUser(user.id)
+                    }
+                    className="text-red-600"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </DashboardLayout>
   );
 }

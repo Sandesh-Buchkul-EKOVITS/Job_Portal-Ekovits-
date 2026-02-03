@@ -44,7 +44,6 @@ export default function Header() {
               <Link to="/jobs">Jobs</Link>
               <Link to="/candidate/saved-jobs">Saved Jobs</Link>
               <Link to="/candidate/applications">Applications</Link>
-              <Link to="/candidate/dashboard">Dashboard</Link>
               <Link to="/candidate/profile">Profile</Link>
               <button onClick={logout} className="text-red-600">
                 Logout

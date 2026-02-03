@@ -1,23 +1,27 @@
 import { Navigate } from "react-router-dom";
 
-export default function RequireRole({ allowedRoles, children }) {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+export default function RequireRole({
+  allowedRoles,
+  children,
+}) {
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+  );
 
-  if (!user) {
+  if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
-    // Redirect based on role
-    if (user.role === "candidate") {
-      return <Navigate to="/jobs" replace />;
-    }
-    if (user.role === "employer") {
-      return <Navigate to="/employer/dashboard" replace />;
-    }
-    if (user.role === "admin") {
-      return <Navigate to="/admin/dashboard" replace />;
-    }
+  /* 🚫 BLOCK CHECK */
+  if (currentUser.blocked) {
+    localStorage.removeItem("currentUser");
+    return <Navigate to="/login" replace />;
+  }
+
+  if (
+    !allowedRoles.includes(currentUser.role)
+  ) {
+    return <Navigate to="/" replace />;
   }
 
   return children;

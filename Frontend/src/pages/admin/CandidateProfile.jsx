@@ -1,103 +1,201 @@
-import { useParams } from "react-router-dom";
 import DashboardLayout from "../../app/layouts/DashboardLayout";
-import BackButton from "../../components/common/BackButton";
+import { useParams, useNavigate } from "react-router-dom";
+import { getCandidateProfile } from "../../app/services/profileService";
 
-export default function AdminCandidateProfile() {
+export default function CandidateProfile() {
   const { id } = useParams();
-  const users = JSON.parse(localStorage.getItem("users")) || [];
+  const navigate = useNavigate();
 
-  const candidate = users.find(
-    (u) => String(u.id) === String(id)
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
   );
 
-  if (!candidate || !candidate.profile) {
+  /* ---------- HARD GUARD ---------- */
+  if (!currentUser || currentUser.role !== "admin") {
     return (
       <DashboardLayout title="Candidate Profile">
-        <BackButton />
-        <p className="text-gray-600">Profile not found.</p>
+        <div className="bg-white p-6 rounded shadow">
+          Access denied.
+        </div>
       </DashboardLayout>
     );
   }
 
-  const {
-    photo,
-    location,
-    phone,
-    skills,
-    experience,
-    resume,
-    completeness,
-  } = candidate.profile;
+  /* ---------- FIXED ID MATCH ---------- */
+  const users =
+    JSON.parse(localStorage.getItem("users")) || [];
+
+  const baseUser = users.find(
+    (u) => String(u.id) === String(id)
+  );
+
+  const savedProfile =
+    getCandidateProfile(id) || {};
+
+  if (!baseUser) {
+    return (
+      <DashboardLayout title="Candidate Profile">
+        <div className="bg-white p-6 rounded shadow">
+          Candidate not found.
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  /* ---------- MERGED VIEW MODEL ---------- */
+  const profile = {
+    id,
+    name: savedProfile.name || baseUser.name || "N/A",
+    email: savedProfile.email || baseUser.email || "N/A",
+    phone: savedProfile.phone || baseUser.phone || "N/A",
+    location: savedProfile.location || "",
+    currentCTC: savedProfile.currentCTC || "",
+    summary: savedProfile.summary || "",
+    skills: savedProfile.skills || [],
+    experience: savedProfile.experience || [],
+    education: savedProfile.education || [],
+    resume: savedProfile.resume || null,
+    photo: savedProfile.photo || "",
+    profileCompleted:
+      savedProfile.profileCompleted ?? false,
+  };
 
   return (
-    <DashboardLayout title="Candidate Profile (Read Only)">
-      <BackButton />
+    <DashboardLayout title="Candidate Profile">
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow space-y-6">
 
-      <div className="bg-white p-6 rounded shadow max-w-3xl">
-        {/* HEADER */}
-        <div className="flex items-center gap-4 mb-6">
-          {photo ? (
+        {/* BASIC INFO */}
+        <div className="flex items-center gap-4">
+          {profile.photo ? (
             <img
-              src={photo}
+              src={profile.photo}
               alt="Profile"
-              className="w-20 h-20 rounded-full object-cover"
+              className="w-24 h-24 rounded-full object-cover"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-500">No Photo</span>
+            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+              No Photo
             </div>
           )}
 
           <div>
             <h2 className="text-xl font-semibold">
-              {candidate.name}
+              {profile.name}
             </h2>
             <p className="text-sm text-gray-600">
-              {candidate.email}
+              {profile.email}
             </p>
             <p className="text-sm text-gray-600">
-              📞 {phone || "N/A"}
+              {profile.phone}
             </p>
           </div>
         </div>
 
-        {/* DETAILS */}
-        <div className="space-y-3">
-          <Info label="Location" value={location} />
-          <Info label="Experience" value={experience} />
-          <Info label="Skills" value={skills?.join(", ")} />
+        {/* SUMMARY */}
+        <Section title="Professional Summary">
+          <p className="whitespace-pre-wrap text-sm text-gray-700">
+            {profile.summary || "Not provided"}
+          </p>
+        </Section>
 
-          <Info
-            label="Profile Completeness"
-            value={`${completeness || 0}%`}
-          />
-
-          {resume && (
-            <div>
-              <p className="font-medium">Resume</p>
-              <a
-                href={resume}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline text-sm"
-              >
-                View Resume
-              </a>
+        {/* SKILLS */}
+        <Section title="Skills">
+          {profile.skills.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {profile.skills.map((skill, i) => (
+                <span
+                  key={i}
+                  className="bg-gray-200 px-3 py-1 rounded-full text-sm"
+                >
+                  {skill}
+                </span>
+              ))}
             </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              No skills added
+            </p>
           )}
-        </div>
+        </Section>
+
+        {/* EXPERIENCE */}
+        <Section title="Work Experience">
+          {profile.experience.length > 0 ? (
+            profile.experience.map((e, i) => (
+              <div
+                key={i}
+                className="border-b pb-3 mb-3"
+              >
+                <p className="font-medium">
+                  {e.role} – {e.company}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {e.start} –{" "}
+                  {e.current ? "Present" : e.end}
+                </p>
+                <p className="text-sm text-gray-700">
+                  {e.description}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500">
+              No experience added
+            </p>
+          )}
+        </Section>
+
+        {/* EDUCATION */}
+        <Section title="Education">
+          {profile.education.length > 0 ? (
+            profile.education.map((e, i) => (
+              <div key={i}>
+                <p className="font-medium">{e.degree}</p>
+                <p className="text-xs text-gray-500">
+                  {e.institute} • {e.year}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500">
+              No education added
+            </p>
+          )}
+        </Section>
+
+        {/* RESUME */}
+        <Section title="Resume">
+          {profile.resume ? (
+            <a
+              href={profile.resume.data}
+              download={profile.resume.name}
+              className="text-blue-600 underline text-sm"
+            >
+              Download Resume
+            </a>
+          ) : (
+            <p className="text-sm text-gray-500">
+              Resume not uploaded
+            </p>
+          )}
+        </Section>
+
+        <button
+          onClick={() => navigate(-1)}
+          className="border px-4 py-2 rounded"
+        >
+          Back
+        </button>
       </div>
     </DashboardLayout>
   );
 }
 
-function Info({ label, value }) {
+function Section({ title, children }) {
   return (
     <div>
-      <p className="font-medium">{label}</p>
-      <p className="text-sm text-gray-700">
-        {value || "Not provided"}
-      </p>
+      <h3 className="font-semibold mb-2">{title}</h3>
+      {children}
     </div>
   );
 }

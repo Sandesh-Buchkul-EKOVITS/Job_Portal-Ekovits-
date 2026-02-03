@@ -1,17 +1,20 @@
 export function calculateProfileCompletion(profile) {
   if (!profile) return 0;
 
-  let score = 0;
+  const fields = [
+    profile.name,
+    profile.contact,
+    profile.location,
+    profile.skills?.length > 0,
+    profile.resume,
+    profile.expectedCTC,
+    profile.noticePeriod,
+  ];
 
-  if (profile.name) score += 10;
-  if (profile.email) score += 10;
-  if (profile.contact) score += 10;
-  if (profile.location) score += 10;
-  if (profile.photo) score += 10;
-  if (profile.resume) score += 10;
-  if (profile.skills && profile.skills.length > 0) score += 20;
-  if (profile.ctc) score += 10;
-  if (profile.profileCompleted) score += 10;
+  const filled = fields.filter(Boolean).length;
+  return Math.round((filled / fields.length) * 100);
+}
 
-  return Math.min(score, 100);
+export function isProfileComplete(profile) {
+  return calculateProfileCompletion(profile) >= 70;
 }

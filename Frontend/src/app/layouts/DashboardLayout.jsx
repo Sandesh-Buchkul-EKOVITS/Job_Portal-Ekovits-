@@ -6,11 +6,11 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {title && (
+        {/* {title && (
           <h1 className="text-2xl font-semibold mb-6">
             {title}
           </h1>
-        )}
+        )} */}
 
         <div
           className={

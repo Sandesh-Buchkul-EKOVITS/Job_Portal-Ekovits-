@@ -1,33 +1,31 @@
-export function getSavedJobs(candidateId) {
-  const saved = JSON.parse(localStorage.getItem("savedJobs")) || [];
-  return saved.filter((j) => j.candidateId === candidateId);
+const STORAGE_KEY = "savedJobs";
+
+export function getSavedJobs(userId) {
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  return data.filter((j) => j.userId === userId);
 }
 
-export function isJobSaved(candidateId, jobId) {
-  const saved = JSON.parse(localStorage.getItem("savedJobs")) || [];
-  return saved.some(
-    (j) => j.candidateId === candidateId && j.jobId === jobId
+export function isJobSaved(userId, jobId) {
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  return data.some(
+    (j) => j.userId === userId && j.jobId === jobId
   );
 }
 
-export function toggleSaveJob(candidateId, jobId) {
-  let saved = JSON.parse(localStorage.getItem("savedJobs")) || [];
+export function toggleSaveJob(userId, jobId) {
+  let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-  const exists = saved.some(
-    (j) => j.candidateId === candidateId && j.jobId === jobId
+  const exists = data.some(
+    (j) => j.userId === userId && j.jobId === jobId
   );
 
   if (exists) {
-    saved = saved.filter(
-      (j) => !(j.candidateId === candidateId && j.jobId === jobId)
+    data = data.filter(
+      (j) => !(j.userId === userId && j.jobId === jobId)
     );
   } else {
-    saved.push({
-      candidateId,
-      jobId,
-      savedAt: new Date().toISOString(),
-    });
+    data.push({ userId, jobId });
   }
 
-  localStorage.setItem("savedJobs", JSON.stringify(saved));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }

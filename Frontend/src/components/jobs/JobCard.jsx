@@ -1,48 +1,95 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useCurrentUser } from "../../app/auth/useCurrentUser";
 import { isJobSaved, toggleSaveJob } from "../../utils/jobBookmarks";
 
 export default function JobCard({ job }) {
   const navigate = useNavigate();
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const { user } = useCurrentUser();
+  const [saved, setSaved] = useState(false);
 
-  const isCandidate = currentUser?.role === "candidate";
-  const saved = isCandidate
-    ? isJobSaved(currentUser.id, job.id)
-    : false;
+  useEffect(() => {
+    if (user?.id && job?.id) {
+      setSaved(isJobSaved(user.id, job.id));
+    }
+  }, [user, job?.id]);
 
   const handleSave = (e) => {
     e.stopPropagation();
-    toggleSaveJob(currentUser.id, job.id);
-    window.location.reload();
+    toggleSaveJob(user.id, job.id);
+    setSaved((prev) => !prev);
   };
 
   return (
     <div
-      className="bg-white p-5 rounded shadow hover:shadow-md transition cursor-pointer"
       onClick={() => navigate(`/jobs/${job.id}`)}
+      className="border rounded-lg p-5 bg-white shadow-sm hover:shadow-md transition cursor-pointer space-y-4"
     >
+      {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="text-lg font-semibold">{job.title}</h3>
-          <p className="text-sm text-gray-600">{job.company}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            {job.location} • {job.jobType}
+          <h3 className="text-lg font-semibold">
+            {job.title}
+          </h3>
+          <p className="text-sm text-gray-600">
+            {job.companyName}
           </p>
         </div>
 
-        {isCandidate && (
+        {user && (
           <button
             onClick={handleSave}
-            className="text-xl"
-            title={saved ? "Unsave Job" : "Save Job"}
+            className={`text-sm ${
+              saved ? "text-blue-600" : "text-gray-400"
+            }`}
           >
-            {saved ? "★" : "☆"}
+            {saved ? "Saved" : "Save"}
           </button>
         )}
       </div>
 
-      <p className="text-sm text-gray-600 mt-3 line-clamp-2">
-        {job.description}
+      {/* Meta */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+        <Meta
+          label="Experience"
+          value={job.experience || "-"}
+        />
+        <Meta
+          label="Salary"
+          value={
+            job.salaryFrom && job.salaryTo
+              ? `${job.salaryFrom} - ${job.salaryTo}`
+              : "-"
+          }
+        />
+        <Meta
+          label="Work Mode"
+          value={job.workMode || "-"}
+        />
+        <Meta
+          label="Location"
+          value={job.location || "-"}
+        />
+      </div>
+
+      {/* Short Description */}
+      {job.shortDescription && (
+        <p className="text-sm text-gray-600 line-clamp-2">
+          {job.shortDescription}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Meta({ label, value }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-500">
+        {label}
+      </p>
+      <p className="font-medium">
+        {value}
       </p>
     </div>
   );

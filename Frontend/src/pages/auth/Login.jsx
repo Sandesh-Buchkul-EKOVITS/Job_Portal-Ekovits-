@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+/* ---------- FIXED SUPER ADMIN ---------- */
 const FIXED_ADMIN = {
   id: "ADMIN_001",
   name: "Ekovits",
@@ -11,6 +12,7 @@ const FIXED_ADMIN = {
 
 export default function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +20,7 @@ export default function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    /* 🔐 FIXED ADMIN LOGIN (ALWAYS WORKS) */
+    /* ---------- SUPER ADMIN LOGIN ---------- */
     if (
       email === FIXED_ADMIN.email &&
       password === FIXED_ADMIN.password
@@ -31,24 +33,42 @@ export default function Login() {
       return;
     }
 
-    /* 🔐 NORMAL USER LOGIN */
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+    /* ---------- NORMAL USERS ---------- */
+    const users =
+      JSON.parse(localStorage.getItem("users")) || [];
 
     const user = users.find(
-      (u) => u.email === email && u.password === password
+      (u) =>
+        u.email === email &&
+        u.password === password
     );
 
     if (!user) {
-      setError("Invalid credentials");
+      setError("Invalid email or password");
       return;
     }
 
-    localStorage.setItem("currentUser", JSON.stringify(user));
+    /* ---------- BLOCK CHECK ---------- */
+    if (user.blocked) {
+      setError(
+        "Your account has been blocked by admin. Please contact support."
+      );
+      localStorage.removeItem("currentUser");
+      return;
+    }
 
-    if (user.role === "employer") {
-      navigate("/employer/dashboard");
-    } else {
+    localStorage.setItem(
+      "currentUser",
+      JSON.stringify(user)
+    );
+
+    /* ---------- REDIRECT ---------- */
+    if (user.role === "candidate") {
       navigate("/jobs");
+    } else if (user.role === "employer") {
+      navigate("/employer/dashboard");
+    } else if (user.role === "admin") {
+      navigate("/admin/dashboard");
     }
   };
 
@@ -56,12 +76,14 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <form
         onSubmit={handleLogin}
-        className="bg-white p-6 rounded shadow w-80 space-y-4"
+        className="bg-white p-6 rounded shadow w-full max-w-sm"
       >
-        <h2 className="text-xl font-semibold text-center">Login</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          Login
+        </h2>
 
         {error && (
-          <p className="text-red-600 text-sm text-center">
+          <p className="text-red-600 text-sm mb-3">
             {error}
           </p>
         )}
@@ -69,29 +91,31 @@ export default function Login() {
         <input
           type="email"
           placeholder="Email"
-          required
-          className="w-full border p-2 rounded"
+          className="border p-2 rounded w-full mb-3"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
+          required
         />
 
         <input
           type="password"
           placeholder="Password"
-          required
-          className="w-full border p-2 rounded"
+          className="border p-2 rounded w-full mb-4"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
+          required
         />
 
-        <button className="bg-blue-600 text-white w-full py-2 rounded">
+        <button
+          type="submit"
+          className="bg-blue-600 text-white py-2 rounded w-full"
+        >
           Login
         </button>
-
-        <p className="text-xs text-gray-500 text-center mt-2">
-          Admin Login:<br />
-          superadmin@jobportal.com / SuperAdmin@123
-        </p>
       </form>
     </div>
   );

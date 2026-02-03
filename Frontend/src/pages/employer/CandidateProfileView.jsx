@@ -1,97 +1,152 @@
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../app/layouts/DashboardLayout";
+import { getCandidateProfile } from "../../app/services/profileService";
 
-export default function CandidateProfileView() {
-  const { id } = useParams();
+export default function EmployerCandidateProfileView() {
+  const { id } = useParams(); // candidate userId
   const navigate = useNavigate();
 
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const candidate = users.find(
-    (u) => u.id === Number(id) && u.role === "candidate"
-  );
+  const profile = getCandidateProfile(id);
 
-  if (!candidate) {
+  if (!profile) {
     return (
       <DashboardLayout title="Candidate Profile">
-        <p className="text-red-600">Candidate not found</p>
+        <div className="bg-white p-6 rounded shadow text-gray-600">
+          Candidate profile not found.
+        </div>
+
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-sm text-blue-600 underline"
+          >
+            ← Back
+          </button>
+        </div>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout title="Candidate Profile">
-      <div className="max-w-3xl bg-white p-6 rounded shadow space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          {candidate.photo && (
-            <img
-              src={candidate.photo}
-              alt="Profile"
-              className="w-24 h-24 rounded-full object-cover"
-            />
-          )}
-          <div>
-            <h2 className="text-xl font-semibold">{candidate.name}</h2>
-            <p className="text-sm text-gray-600">{candidate.email}</p>
-          </div>
-        </div>
+      <div className="max-w-5xl mx-auto space-y-6">
 
-        {/* Details */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="Contact Number" value={candidate.contact} />
-          <Field label="Location" value={candidate.location || "N/A"} />
-          <Field label="Current CTC" value={candidate.ctc || "N/A"} />
-        </div>
-
-        {/* Skills */}
-        <div>
-          <h3 className="font-semibold mb-2">Key Skills</h3>
-          <div className="flex flex-wrap gap-2">
-            {candidate.skills?.length > 0 ? (
-              candidate.skills.map((skill, i) => (
-                <span
-                  key={i}
-                  className="bg-gray-200 px-3 py-1 rounded text-xs"
-                >
-                  {skill}
-                </span>
-              ))
+        {/* BASIC INFO */}
+        <div className="bg-white p-6 rounded shadow flex gap-6 items-center">
+          <div className="w-32 h-32 rounded-full border overflow-hidden bg-gray-100 flex items-center justify-center">
+            {profile.photo ? (
+              <img
+                src={profile.photo}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
             ) : (
-              <p className="text-sm text-gray-500">No skills added</p>
+              <span className="text-xs text-gray-400">No Photo</span>
             )}
           </div>
+
+          <div>
+            <h1 className="text-2xl font-semibold">{profile.name}</h1>
+            <p className="text-gray-600">{profile.email}</p>
+            <p className="text-sm text-gray-500">{profile.location}</p>
+          </div>
         </div>
 
-        {/* Resume */}
-        {candidate.resume && (
-          <div>
-            <a
-              href={candidate.resume}
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-600 underline text-sm"
-            >
-              View Resume
-            </a>
-          </div>
-        )}
+        {/* SUMMARY */}
+        <Section title="Professional Summary">
+          <p className="whitespace-pre-wrap">
+            {profile.summary || "No summary provided"}
+          </p>
+        </Section>
 
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-gray-700 text-white px-4 py-2 rounded"
-        >
-          Back
-        </button>
+        {/* EXPERIENCE */}
+        <Section title="Work Experience">
+          {profile.experience.length > 0 ? (
+            profile.experience.map((e, i) => (
+              <div key={i} className="border p-3 rounded mb-2">
+                <p className="font-medium">
+                  {e.role} – {e.company}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {e.start} – {e.current ? "Present" : e.end}
+                </p>
+                <p className="text-sm">{e.description}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm">No experience added</p>
+          )}
+        </Section>
+
+        {/* EDUCATION */}
+        <Section title="Education">
+          {profile.education.length > 0 ? (
+            profile.education.map((e, i) => (
+              <div key={i} className="border p-3 rounded mb-2">
+                <p className="font-medium">{e.degree}</p>
+                <p className="text-xs text-gray-500">
+                  {e.institute} • {e.year}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm">No education added</p>
+          )}
+        </Section>
+
+        {/* SKILLS */}
+        <Section title="Skills">
+          {profile.skills.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {profile.skills.map((s, i) => (
+                <span
+                  key={i}
+                  className="bg-gray-200 px-3 py-1 rounded-full text-sm"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No skills added</p>
+          )}
+        </Section>
+
+        {/* RESUME */}
+        <Section title="Resume">
+          {profile.resume ? (
+            <a
+              href={profile.resume.data}
+              download={profile.resume.name}
+              className="text-blue-600 underline"
+            >
+              {profile.resume.name}
+            </a>
+          ) : (
+            <p className="text-gray-500 text-sm">No resume uploaded</p>
+          )}
+        </Section>
+
+        {/* BACK BUTTON – BOTTOM */}
+        <div className="pt-6 text-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-sm text-blue-600 underline"
+          >
+            ← Back to Applicants
+          </button>
+        </div>
+
       </div>
     </DashboardLayout>
   );
 }
 
-function Field({ label, value }) {
+function Section({ title, children }) {
   return (
-    <div>
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="font-medium">{value}</p>
+    <div className="bg-white p-6 rounded border">
+      <h2 className="font-semibold mb-3">{title}</h2>
+      {children}
     </div>
   );
 }
