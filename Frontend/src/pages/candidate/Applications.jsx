@@ -24,6 +24,7 @@ export default function CandidateApplications() {
   const getJob = (jobId) =>
     jobs.find((j) => j.id === jobId);
 
+
   const statusColor = (status) => {
     if (status === "shortlisted") return "text-green-600";
     if (status === "rejected") return "text-red-600";

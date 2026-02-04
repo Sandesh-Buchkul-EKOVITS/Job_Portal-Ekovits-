@@ -30,11 +30,14 @@ export default function ApplyJob() {
     }
   }, [id, user]);
 
+  // ✅ JOB NOT FOUND (PINK BACKGROUND)
   if (!job) {
     return (
       <DashboardLayout title="Apply Job">
-        <div className="bg-white p-6 rounded shadow">
-          Job not found.
+        <div className="min-h-screen bg-pink-50 flex items-center justify-center px-4">
+          <div className="bg-white p-6 rounded-xl shadow max-w-md w-full text-center">
+            <p className="text-gray-700 font-medium">Job not found.</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -74,35 +77,39 @@ export default function ApplyJob() {
 
   return (
     <DashboardLayout title="Apply Job">
-      <div className="bg-white p-6 rounded shadow space-y-4 max-w-3xl mx-auto">
+      {/* ✅ PINK BACKGROUND WRAPPER */}
+      <div className="min-h-screen bg-pink-50 py-10 px-4">
+        <div className="bg-white p-6 rounded-xl shadow space-y-4 max-w-3xl mx-auto">
 
-        <h2 className="text-xl font-semibold">{job.title}</h2>
-        <p className="text-gray-600">{job.companyName}</p>
+          <h2 className="text-xl font-semibold">{job.title}</h2>
+          <p className="text-gray-600">{job.companyName}</p>
 
-        {alreadyApplied && (
-          <div
-            className={`text-sm font-medium capitalize ${statusColor(
-              applicationStatus
-            )}`}
+          {alreadyApplied && (
+            <div
+              className={`text-sm font-medium capitalize ${statusColor(
+                applicationStatus
+              )}`}
+            >
+              You have already applied for this job
+              {applicationStatus && ` • Status: ${applicationStatus}`}
+            </div>
+          )}
+
+          <button
+            onClick={applyJob}
+            disabled={alreadyApplied}
+            className={`px-3 py-1 rounded text-white ${
+              alreadyApplied
+                ? "bg-[linear-gradient(90deg,#ff0066,#8000ff)]"
+                : "bg-[linear-gradient(90deg,#ff0066,#8000ff)]"
+            }`}
           >
-            You have already applied for this job
-            {applicationStatus && ` • Status: ${applicationStatus}`}
-          </div>
-        )}
+            {alreadyApplied ? "Already Applied" : "Confirm & Apply"}
+          </button>
 
-        <button
-          onClick={applyJob}
-          disabled={alreadyApplied}
-          className={`px-6 py-2 rounded text-white ${
-            alreadyApplied
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {alreadyApplied ? "Already Applied" : "Confirm & Apply"}
-        </button>
-
+        </div>
       </div>
     </DashboardLayout>
   );
 }
+
