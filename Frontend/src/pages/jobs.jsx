@@ -187,46 +187,57 @@ export default function Jobs() {
       <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-6">
 
         {/* FILTER PANEL */}
-        <div className="bg-white p-4 rounded shadow space-y-4">
-          <h3 className="font-semibold">Filters</h3>
+        <div className="bg-white p-4 rounded-lg shadow space-y-4">
+        <h3 className="text-[#4a1d82] font-semibold text-lg">Filters</h3>
 
-          <input
-            className="border p-2 w-full"
+           <input
+           className="border border-blue-200 p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-gray-100 focus:border-gray-400"
+
             placeholder="Search job, company, location"
             value={filters.keyword}
             onChange={(e) =>
-              setFilters({ ...filters, keyword: e.target.value })
-            }
+            setFilters({ ...filters, keyword: e.target.value })
+           }
           />
 
-          <select
-            className="border p-2 w-full"
-            value={filters.industry}
-            onChange={(e) =>
-              setFilters({ ...filters, industry: e.target.value })
-            }
-          >
-            <option value="">All Industries</option>
-            {industries.map((i) => (
-              <option key={i} value={i}>{i}</option>
-            ))}
-          </select>
+           <select
 
+         className={`border border-blue-200 p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-gray-100 focus:border-gray-100
+         ${filters.industry === "" ? "text-[#4a1d82]" : "text-black-800"}
+        `}
+         value={filters.industry}
+         onChange={(e) =>
+         setFilters({ ...filters, industry: e.target.value })
+         }
+>
+         <option value ="">All Industries</option>
+         {industries.map((i) => (
+         <option key={i} value={i}>
+         {i}
+         </option>
+         ))}
+         </select>
           <select
-            className="border p-2 w-full"
-            value={filters.workMode}
-            onChange={(e) =>
-              setFilters({ ...filters, workMode: e.target.value })
-            }
-          >
-            <option value="">All Work Modes</option>
-            {workModes.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
+         className={`border border-blue-200  p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-gray-100 focus:border-gray-100
+        ${filters.workMode === "" ? "text-[#4a1d82]" : "text-gray-800"}
+        `}
+         value={filters.workMode}
+         onChange={(e) =>
+         setFilters({ ...filters, workMode: e.target.value })
+         }
+>
+         <option value="">All Work Modes</option>
+         {workModes.map((m) => (
+         <option key={m} value={m}>
+         {m}
+         </option>
+         ))}
+         </select>
 
-          <input
-            className="border p-2 w-full"
+
+          <p className="text-[#4a1d82] font-semibold">Location</p>
+          <input       
+            className="border border-blue-200 p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-gray-100 focus:border-gray-400"          
             placeholder="Location"
             value={filters.location}
             onChange={(e) =>
@@ -236,7 +247,7 @@ export default function Jobs() {
 
           {/* EXPERIENCE FILTER */}
           <div>
-            <p className="text-sm font-medium mb-1">Experience</p>
+            <p className="text-[#4a1d82] font-semibold">Experience</p>
             <div className="flex flex-wrap gap-2">
               {EXPERIENCE_RANGES.map((e) => {
                 const active = filters.experiences.includes(e);
@@ -244,10 +255,10 @@ export default function Jobs() {
                   <button
                     key={e}
                     onClick={() => toggleExperience(e)}
-                    className={`px-3 py-1 text-xs border rounded ${
-                      active
-                        ? "bg-purple-600 text-white"
-                        : ""
+                   className={`px-3 py-1 text-xs border rounded transition-all duration-200 ${
+                    active 
+                    ? "bg-gray-200 text-gray-900 border-gray-400" 
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
                     }`}
                   >
                     {e}
@@ -259,8 +270,9 @@ export default function Jobs() {
 
           {/* MULTI SKILL */}
           <div>
+            <p className="text-[#4a1d82] font-semibold">Skills</p>
             <input
-              className="border p-2 w-full"
+              className="border border-blue-200 p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-gray-100 focus:border-gray-400" 
               placeholder="Type skill & press Enter"
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
@@ -269,20 +281,19 @@ export default function Jobs() {
 
             <div className="flex flex-wrap gap-2 mt-2">
               {filters.skills.map((s) => (
-                <span
-                  key={s}
-                  className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs flex items-center gap-2"
-                >
-                  {s}
-                  <button onClick={() => removeSkill(s)}>×</button>
-                </span>
+                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs flex items-center gap-2">
+               {s}
+              <button className="hover:text-red-500" onClick={() => removeSkill(s)}>×</button>
+              </span>
+
               ))}
             </div>
           </div>
 
           {/* SALARY */}
           <div>
-            <p className="text-sm font-medium mb-1">
+            <p className="text-[#4a1d82] font-semibold">
+              
               Salary Range (Monthly)
             </p>
             <div className="flex flex-wrap gap-2">
@@ -294,9 +305,9 @@ export default function Jobs() {
                   <button
                     key={r.label}
                     onClick={() => toggleSalaryRange(r)}
-                    className={`px-3 py-1 text-xs border rounded ${
+                    className={`px-3 py-1 text-xs border rounded text-[#4a1d82] ${
                       active
-                        ? "bg-green-600 text-white"
+                        ? "bg-gray-200 text-gray-900 border-gray-400"
                         : ""
                     }`}
                   >
@@ -308,33 +319,36 @@ export default function Jobs() {
           </div>
 
           <select
-            className="border p-2 w-full"
-            value={filters.sort}
-            onChange={(e) =>
+            className={`border border-blue-200 p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-gray-100 focus:border-gray-100
+              ${filters.sort === "latest" ? "text-[#4a1d82]" : "text-gray-800"}
+              `}
+              value={filters.sort}
+               onChange={(e) =>
               setFilters({ ...filters, sort: e.target.value })
-            }
-          >
+                }
+             >
             <option value="latest">Latest Jobs</option>
             <option value="salary">Highest Salary</option>
-          </select>
+             </select>
 
           <button
-            onClick={() =>
-              setFilters({
-                keyword: "",
-                industry: "",
-                workMode: "",
-                location: "",
-                sort: "latest",
-                skills: [],
-                salaryRanges: [],
-                experiences: [],
-              })
-            }
-            className="text-xs underline"
-          >
-            Clear All Filters
-          </button>
+       onClick={() =>
+      setFilters({
+       keyword: "",
+       industry: "",
+       workMode: "",
+       location: "",
+       sort: "latest",
+       skills: [],
+       salaryRanges: [],
+       experiences: [],
+       })
+       }
+        className="text-[#4a1d82] font-semibold underline hover:text-[#7b4de8] transition-colors duration-200"
+>
+       Clear All Filters
+       </button>
+
         </div>
 
         {/* JOB LIST */}
