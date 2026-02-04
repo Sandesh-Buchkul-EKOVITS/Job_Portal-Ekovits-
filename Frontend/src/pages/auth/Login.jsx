@@ -1,122 +1,135 @@
+
+
+
+
+import "./Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-/* ---------- FIXED SUPER ADMIN ---------- */
-const FIXED_ADMIN = {
-  id: "ADMIN_001",
-  name: "Ekovits",
-  email: "superadmin@ekovits.com",
-  password: "Ekovits@123",
-  role: "admin",
-};
-
-export default function Login() {
+function Login() {
+  const [role, setRole] = useState(null);
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
 
-    /* ---------- SUPER ADMIN LOGIN ---------- */
-    if (
-      email === FIXED_ADMIN.email &&
-      password === FIXED_ADMIN.password
-    ) {
-      localStorage.setItem(
-        "currentUser",
-        JSON.stringify(FIXED_ADMIN)
-      );
-      navigate("/admin/dashboard");
-      return;
-    }
-
-    /* ---------- NORMAL USERS ---------- */
-    const users =
-      JSON.parse(localStorage.getItem("users")) || [];
-
-    const user = users.find(
-      (u) =>
-        u.email === email &&
-        u.password === password
-    );
-
-    if (!user) {
-      setError("Invalid email or password");
-      return;
-    }
-
-    /* ---------- BLOCK CHECK ---------- */
-    if (user.blocked) {
-      setError(
-        "Your account has been blocked by admin. Please contact support."
-      );
-      localStorage.removeItem("currentUser");
-      return;
-    }
-
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify(user)
-    );
-
-    /* ---------- REDIRECT ---------- */
-    if (user.role === "candidate") {
-      navigate("/jobs");
-    } else if (user.role === "employer") {
-      navigate("/employer/dashboard");
-    } else if (user.role === "admin") {
-      navigate("/admin/dashboard");
+    if (role === "candidate") {
+      navigate("/candidate");
+    } else if (role === "employer") {
+      navigate("/employer");
     }
   };
 
+
+  const registerLink =
+    role === "candidate"
+      ? "/register?role=candidate"
+      : role === "employer"
+      ? "/register?role=employer"
+      : "/register";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-6 rounded shadow w-full max-w-sm"
-      >
-        <h2 className="text-xl font-semibold mb-4">
-          Login
-        </h2>
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow mx-auto w-100" style={{ maxWidth: "550px" }}>
+        <div className="card-body">
+           <div className="inner-form-box">
+          <h3 className="text-center mb-3" >Login</h3>
 
-        {error && (
-          <p className="text-red-600 text-sm mb-3">
-            {error}
-          </p>
-        )}
+          {/* Role Selection */}
+          {!role && (
+            <>
+              <h4 className="text-center mb-4">Choose login type</h4>
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="border p-2 rounded w-full mb-3"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-          required
-        />
+              <div className="role-wrapper">
+                <div
+                  className="role-card candidate text-center"
+                  onClick={() => setRole("candidate")}
+                >
+                  <div className="icon mb-3">👤</div>
+                  <h5>Candidate</h5>
+                </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="border p-2 rounded w-full mb-4"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-          required
-        />
+                <div
+                  className="role-card employer text-center"
+                  onClick={() => setRole("employer")}
+                >
+                  <div className="icon mb-3">💼</div>
+                  <h5>Employer</h5>
+                </div>
+              </div>
+            </>
+          )}
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white py-2 rounded w-full"
-        >
-          Login
-        </button>
-      </form>
+          {/* Login Form */}
+          {role && (
+            <>
+              <form className="login-form" onSubmit={handleLogin}>
+                <div className="mb-3">
+                  <label className="form-label">Username</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter your username"
+                    required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+
+           <a href="/forgot-password" className="forgot-link">
+    Forgot password?
+  </a>
+
+
+          <div className="login-row">
+  <button type="submit" className="btn-primary">
+    Login
+  </button>
+
+ 
+</div>
+
+
+
+              </form>
+                {role && (
+  <p className="text-center mt-3">
+    {role === "candidate" && (
+      <>
+        Create your new Candidate profile{" "}
+        <a href="\register" style={{ color: "#007bff" }}>
+          Create Profile
+        </a>
+      </>
+    )}
+
+    {role === "employer" && (
+      <>
+        Create your new Employer profile{" "}
+        <a href="\Employer" style={{ color: "#007bff" }}>
+          Create Profile
+        </a>
+      </>
+    )}
+  </p>
+)}
+
+            </>
+          )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+
+export default Login;
+
