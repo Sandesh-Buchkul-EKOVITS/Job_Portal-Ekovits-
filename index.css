@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ /* registration */
+body {
+  font-family: system-ui, sans-serif;
+}
+.gradient-btn {
+  background: linear-gradient(90deg, #ff0066, #8000ff);
+  color: white;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+ 
+}
+.gradient-btn:hover {
+  opacity: 0.9;
+  color: black;
+
+}
+.gradient-btn {
+  display: block;
+  margin: 0 auto; 
+}
+
+
+
+
+
+.text-center mb-3,h3,h4{
+  color:black;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  
+
+}
+
+
+
+.role-card:hover {
+  border-color: #0d6efd;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+
+.role-card .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+
+.role-card.active {
+  border-color: #0d6efd;
+  box-shadow: 0 12px 30px rgba(13, 110, 253, 0.25);
+  position: relative;
+}
+
+.role-card.active::after {
+  content: "✓";
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  background: #0d6efd;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+.role-card {
+  transition: all 0.25s ease;
+}
+
+.role-card:hover {
+  transform: translateY(-6px);
+}
+
+
+
+.role-card.candidate.active {
+  border-color: #0d6efd;
+}
+
+.role-card.employer.active {
+  border-color: #6f42c1;
+}
+
+
+
+.role-card .icon {
+  font-size: 54px;
+  margin-bottom: 16px;
+}
+/* here the login page choose box end */
+
+
+
+
+
+.card {
+  border-radius: 18px;
+}
+
+
+.card-body form {
+  max-width: 470px;
+  margin: 0 auto;
+}
+
+
+.card-body label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+
+.card-body .form-control {
+  height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+  width: 450px;
+}
+
+
+.card-body .btn-primary {
+  margin-top: 10px;
+  height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.card-body p {
+  margin-bottom: 20px;
+}
+
+
+.card-body small {
+  color: #6c757d;
+}
+
+
+.card-body .btn-link {
+  text-decoration: none;
+  font-size: 14px;
+  color: #6c757d;
+  
+}
+
+.card-body .btn-link:hover {
+  text-decoration: underline;
+}
+
+.btn btn-primary w-100{
+  background-color: #0d6efd;
+}
+
+
+
+
+
+
+.login-form {
+  margin-top: 20px;
+}
+
+.login-form .form-label {
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.login-form .form-control {
+  height: 45px;
+  font-size: 15px;
+  border-radius: 6px;
+}
+
+
+.login-form .btn-primary {
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+
+.card {
+  border-radius: 12px;
+}
+
