@@ -131,10 +131,13 @@ export default function EmployerCandidateProfileView() {
         <div className="pt-6 text-center">
           <button
             onClick={() => navigate(-1)}
-            className="text-sm text-blue-600 underline"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#7A004B] to-[#CC0047]
+             text-white px-4 py-2 rounded-lg text-sm font-medium
+             hover:opacity-90 transition shadow"
           >
             ← Back to Applicants
           </button>
+
         </div>
 
       </div>

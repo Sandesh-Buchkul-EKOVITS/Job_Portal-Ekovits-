@@ -91,7 +91,9 @@ export default function MyJobs() {
               <div className="flex gap-4 mt-4 text-sm">
                 <button
                   onClick={() =>
-                    navigate(`/employer/applicants?jobId=${job.id}`)
+                    // navigate(`/employer/applicants?jobId=${job.id}`)
+                    navigate(`/employer/applicants/${job.id}`)
+
                   }
                   className="text-blue-600 hover:underline"
                 >
