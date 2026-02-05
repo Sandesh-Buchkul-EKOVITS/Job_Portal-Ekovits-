@@ -1,8 +1,12 @@
+import { useState } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Header() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("currentUser"));
+  const [empOpen, setEmpOpen] = useState(false);
+
 
   const logout = () => {
     localStorage.removeItem("currentUser");
@@ -52,7 +56,7 @@ export default function Header() {
           )}
 
           {/* EMPLOYER */}
-          {user?.role === "employer" && (
+          {/* {user?.role === "employer" && (
             <>
               <Link to="/employer/dashboard">Dashboard</Link>
               <Link to="/employer/post-job">Post Job</Link>
@@ -62,7 +66,74 @@ export default function Header() {
                 Logout
               </button>
             </>
-          )}
+          )} */}
+
+
+          {user?.role === "employer" && (
+  <div className="relative">
+    {/* Desktop Employer Nav */}
+    <div className="hidden md:flex items-center gap-6">
+      <Link to="/employer/dashboard">Dashboard</Link>
+      <Link to="/employer/post-job">Post Job</Link>
+      <Link to="/employer/my-jobs">My Jobs</Link>
+      <Link to="/employer/applicants">Applicants</Link>
+      <button onClick={logout} className="text-red-600">
+        Logout
+      </button>
+    </div>
+
+    {/* Mobile Hamburger */}
+    <button
+      className="md:hidden text-xl"
+      onClick={() => setEmpOpen(!empOpen)}
+    >
+      ☰
+    </button>
+
+    {/* Mobile Employer Menu */}
+    {empOpen && (
+      <div className="absolute right-0 mt-3 w-48 bg-white border rounded shadow-md flex flex-col text-sm">
+        <Link
+          to="/employer/dashboard"
+          className="px-4 py-2 hover:bg-gray-100"
+          onClick={() => setEmpOpen(false)}
+        >
+          Dashboard
+        </Link>
+        <Link
+          to="/employer/post-job"
+          className="px-4 py-2 hover:bg-gray-100"
+          onClick={() => setEmpOpen(false)}
+        >
+          Post Job
+        </Link>
+        <Link
+          to="/employer/my-jobs"
+          className="px-4 py-2 hover:bg-gray-100"
+          onClick={() => setEmpOpen(false)}
+        >
+          My Jobs
+        </Link>
+        <Link
+          to="/employer/applicants"
+          className="px-4 py-2 hover:bg-gray-100"
+          onClick={() => setEmpOpen(false)}
+        >
+          Applicants
+        </Link>
+        <button
+          onClick={logout}
+          className="px-4 py-2 text-left text-red-600 hover:bg-gray-100"
+        >
+          Logout
+        </button>
+      </div>
+    )}
+  </div>
+)}
+
+
+
 
           {/* ADMIN */}
           {user?.role === "admin" && (
