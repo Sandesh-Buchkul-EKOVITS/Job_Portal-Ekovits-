@@ -168,31 +168,39 @@ export default function ApplyJob() {
     );
   }
 
-  const applyJob = () => {
-    if (alreadyApplied || isLimitReached) return;
 
-    const applications =
-      JSON.parse(localStorage.getItem("applications")) || [];
 
-    const newApplication = {
-      id: Date.now().toString(),
-      jobId: id,
-      userId: user.id,
-      employerId: job.employerId,
-      status: "applied",
-      appliedAt: new Date().toISOString(),
-    };
 
-    localStorage.setItem(
-      "applications",
-      JSON.stringify([...applications, newApplication])
-    );
 
-    setAlreadyApplied(true);
-    setApplicationStatus("applied");
 
-    navigate("/candidate/applications");
-  };
+
+
+
+  // const applyJob = () => {
+  //   if (alreadyApplied || isLimitReached) return;
+
+  //   const applications =
+  //     JSON.parse(localStorage.getItem("applications")) || [];
+
+  //   const newApplication = {
+  //     id: Date.now().toString(),
+  //     jobId: id,
+  //     userId: user.id,
+  //     employerId: job.employerId,
+  //     status: "applied",
+  //     appliedAt: new Date().toISOString(),
+  //   };
+
+  //   localStorage.setItem(
+  //     "applications",
+  //     JSON.stringify([...applications, newApplication])
+  //   );
+
+  //   setAlreadyApplied(true);
+  //   setApplicationStatus("applied");
+
+  //   navigate("/candidate/applications");
+  // };
 
   const statusColor = (status) => {
     if (status === "shortlisted") return "text-green-600";
@@ -229,7 +237,7 @@ export default function ApplyJob() {
           </div>
         )}
 
-        <button
+        {/* <button
           onClick={applyJob}
           disabled={alreadyApplied || isLimitReached}
           className={`px-6 py-2 rounded text-white ${
@@ -243,7 +251,33 @@ export default function ApplyJob() {
             : isLimitReached
             ? "Applications Closed"
             : "Confirm & Apply"}
-        </button>
+        </button> */}
+
+
+
+
+
+
+
+
+<button
+  onClick={applyJob}
+  disabled={alreadyApplied || isLimitReached}
+  className={`px-6 py-2 rounded text-white font-medium transition ${
+    alreadyApplied || isLimitReached
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-gradient-to-r from-[#7A004B] to-[#CC0047] hover:opacity-90"
+  }`}
+>
+  {alreadyApplied
+    ? "Already Applied"
+    : isLimitReached
+    ? "Applications Closed"
+    : "Confirm & Apply"}
+</button>
+
+
+
 
       </div>
     </DashboardLayout>
