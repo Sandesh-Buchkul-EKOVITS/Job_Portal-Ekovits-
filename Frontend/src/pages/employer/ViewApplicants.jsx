@@ -152,16 +152,25 @@
 
 
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import DashboardLayout from "../../app/layouts/DashboardLayout";
 import { getCandidateProfile } from "../../app/services/profileService";
 
 export default function ViewApplicants() {
+  // 🔍 FILTER STATES
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState("all");
+
+
   const navigate = useNavigate();
   const { jobId } = useParams();
 
   const jobs = JSON.parse(localStorage.getItem("jobs")) || [];
   const applications =
     JSON.parse(localStorage.getItem("applications")) || [];
+
 
   const job = jobs.find(
     (j) => String(j.id) === String(jobId)
@@ -171,7 +180,97 @@ export default function ViewApplicants() {
     (a) => String(a.jobId) === String(jobId)
   );
 
+  // 🔥 NEW filter ke liye last 7 days
+const last7Days = new Date();
+last7Days.setDate(last7Days.getDate() - 7);
+
+
+
+  //// addd onnn
+  // 🔥 Sirf wahi jobs jinpe applicants aaye hain
+const appliedJobIds = [
+  ...new Set(applications.map((a) => String(a.jobId))),
+];
+
+const appliedJobs = jobs.filter((job) =>
+  appliedJobIds.includes(String(job.id))
+);
+
+
+
+
+  // 🔎 FILTERED APPLICATIONS
+
+// const filteredApplications = (jobId ? jobApplications : applications)
+//   .filter((app) => {
+//     const appliedJob = jobs.find(
+//       (j) => String(j.id) === String(app.jobId)
+//     );
+
+//     const matchesSearch =
+//       !searchText ||
+//       appliedJob?.title
+//         ?.toLowerCase()
+//         .includes(searchText.toLowerCase());
+
+//     const matchesStatus =
+//       statusFilter === "all" ||
+//       statusFilter === "new" ||
+//       app.status === statusFilter;
+
+//     return matchesSearch && matchesStatus;
+//   })
+//   .sort((a, b) => {
+//     // ✅ NEW = recent applicants first
+//     if (statusFilter === "new") {
+//       return new Date(b.appliedAt) - new Date(a.appliedAt);
+//     }
+//     return 0;
+//   });
+
+
+
+
+
+const filteredApplications = (jobId ? jobApplications : applications)
+  .filter((app) => {
+    // 🔹 Job dropdown filter
+    if (
+      selectedJobId !== "all" &&
+      String(app.jobId) !== String(selectedJobId)
+    ) {
+      return false;
+    }
+
+    // 🔹 NEW = last 7 days applicants
+    if (statusFilter === "new") {
+      return new Date(app.appliedAt) >= last7Days;
+    }
+
+    // 🔹 Normal status filter
+    if (statusFilter !== "all" && app.status !== statusFilter) {
+      return false;
+    }
+
+    return true;
+  })
+  .sort((a, b) => {
+    // 🔥 NEW me recent applicants upar
+    if (statusFilter === "new") {
+      return new Date(b.appliedAt) - new Date(a.appliedAt);
+    }
+    return 0;
+  });
+
+
+
+
+
+
+
+
   const updateStatus = (appId, status) => {
+
     const updated = applications.map((a) =>
       a.id === appId ? { ...a, status } : a
     );
@@ -181,6 +280,166 @@ export default function ViewApplicants() {
     );
     window.location.reload();
   };
+
+
+
+  // its testion code for applicants page 
+  // ✅ CASE 1: Dashboard se Applicants open hua (no jobId)
+  if (!jobId) {
+    return (
+      <DashboardLayout title="All Applicants">
+        <div className="max-w-5xl mx-auto space-y-4">
+
+
+
+
+          {/* 🔍 Filters */}
+          <div className="bg-white p-4 rounded shadow flex flex-col md:flex-row gap-3">
+            {/* <input
+  type="text"
+  placeholder="Search by Job Title (e.g. React Developer)"
+  value={searchText}
+  onChange={(e) => setSearchText(e.target.value)}
+  onFocus={() => setShowDropdown(true)}
+  className="border p-2 rounded w-full"
+ /> */}
+
+
+
+             <select
+  value={selectedJobId}
+  onChange={(e) => setSelectedJobId(e.target.value)}
+  className="border p-2 rounded w-full md:w-1/2 bg-white"
+>
+  <option value="all">All Jobs</option>
+
+  {appliedJobs.map((job) => (
+    <option key={job.id} value={job.id}>
+      {job.title} • {job.location || "NA"} •{" "}
+      {job.createdAt
+        ? new Date(job.createdAt).toLocaleDateString()
+        : ""}
+    </option>
+  ))}
+</select> 
+
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border p-2 rounded w-full md:w-1/4 bg-white"
+            >
+              <option value="all">All Status</option>
+              <option value="new">New</option>
+              <option value="applied">Applied</option>
+              <option value="shortlisted">Shortlisted</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <button
+  onClick={() => {
+    setSearchText("");
+  setStatusFilter("all");
+  setSelectedJobId("all");
+  }}
+  className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 text-sm"
+>
+  Clear All
+</button>
+
+          </div>
+
+
+
+
+
+
+
+
+
+
+
+          {applications.length === 0 ? (
+            <div className="bg-white p-6 rounded shadow">
+              No applicants yet.
+            </div>
+          ) : (
+
+            filteredApplications.map((app) => {
+              const profile = getCandidateProfile(app.userId);
+              const appliedJob = jobs.find(
+                (j) => String(j.id) === String(app.jobId)
+              );
+
+              return (
+                <div
+                  key={app.id}
+                  className="bg-white p-5 rounded shadow flex justify-between items-center"
+                >
+                  <div>
+                    <p className="font-semibold">
+                      {profile?.name || "Candidate"}
+                    </p>
+                    {/* <p className="text-sm text-gray-600">
+                      {appliedJob?.title} • {appliedJob?.companyName}
+                    </p> */}
+                   
+
+                   <p className="text-sm text-gray-600 flex items-center gap-3">
+  <span>
+    {appliedJob?.title} • {appliedJob?.companyName}
+  </span>
+
+  {/* Shortlist */}
+  {app.status !== "shortlisted" && (
+    <button
+      onClick={() => updateStatus(app.id, "shortlisted")}
+      className="text-green-600 hover:underline text-xs"
+    >
+      Shortlist
+    </button>
+  )}
+
+  {/* Reject */}
+  {app.status !== "rejected" && (
+    <button
+      onClick={() => updateStatus(app.id, "rejected")}
+      className="text-red-600 hover:underline text-xs"
+    >
+      Reject
+    </button>
+  )}
+</p>
+
+
+
+
+
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      navigate(`/employer/candidate/${app.userId}`)
+                    }
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    View Profile
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+
+
+
+
+
+
+
 
   if (!job) {
     return (
@@ -277,14 +536,14 @@ export default function ViewApplicants() {
         </button> */}
 
 
-       <button
-  onClick={() => navigate("/employer/my-jobs")}
-  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#7A004B] to-[#CC0047] 
+        <button
+          onClick={() => navigate("/employer/my-jobs")}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-[#7A004B] to-[#CC0047] 
              text-white px-4 py-2 rounded-lg text-sm font-medium 
              hover:opacity-90 transition shadow"
->
-  ← Back to My Jobs
-</button>
+        >
+          ← Back to My Jobs
+        </button>
 
 
       </div>
