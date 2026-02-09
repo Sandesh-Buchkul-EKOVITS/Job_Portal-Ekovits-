@@ -525,7 +525,7 @@ const QUESTION_TEMPLATES = [
   "Are you willing to relocate?",
 ];
 
-const MAX_CHARS = 250;
+// const MAX_CHARS = 250;
 
 // ✅ Subscription Limits
 const PLAN_LIMITS = {
@@ -580,7 +580,7 @@ export default function PostJob() {
 
 
 
-        
+
         <div className="bg-yellow-50 border border-yellow-300 p-6 rounded-xl">
           <p className="font-semibold text-yellow-800">
             Company verification required to post jobs.
@@ -636,58 +636,94 @@ export default function PostJob() {
 
   const [skillInput, setSkillInput] = useState("");
   const [customQuestion, setCustomQuestion] = useState("");
-  const [charCount, setCharCount] = useState(0);
+  // const [charCount, setCharCount] = useState(0);
   const [error, setError] = useState("");
-const [isBulletOn, setIsBulletOn] = useState(false);
+  const [isBulletOn, setIsBulletOn] = useState(false);
 
   useEffect(() => {
     if (editorRef.current && form.description) {
       editorRef.current.innerHTML = form.description;
-      setCharCount(editorRef.current.innerText.length);
+      // setCharCount(editorRef.current.innerText.length);
     }
   }, []);
 
   /* ================= EDITOR ================= */
 
+  // const updateDescription = () => {
+  //   const text = editorRef.current?.innerText || "";
+  //   setCharCount(text.length);
+  //   setForm({ ...form, description: editorRef.current?.innerHTML || "" });
+  // };
+
+
+
+
   const updateDescription = () => {
-    const text = editorRef.current?.innerText || "";
-    setCharCount(text.length);
     setForm({ ...form, description: editorRef.current?.innerHTML || "" });
+  };
+  const handleInput = () => {
+    if (!isBulletOn) {
+      updateDescription();
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const container = range.startContainer;
+
+    // check: nayi line empty hai
+    if (
+      container.nodeType === 3 &&
+      container.textContent === ""
+    ) {
+      const bullet = document.createTextNode("• ");
+      range.insertNode(bullet);
+      range.setStartAfter(bullet);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    updateDescription();
   };
 
 
-const handlePaste = (e) => {
-  e.preventDefault();
 
-  const clipboardData = e.clipboardData || window.clipboardData;
-  const text = clipboardData.getData("text/plain");
 
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
+  const handlePaste = (e) => {
+    e.preventDefault();
 
-  const range = selection.getRangeAt(0);
-  range.deleteContents();
+    const clipboardData = e.clipboardData || window.clipboardData;
+    const text = clipboardData.getData("text/plain");
 
-  // 🔥 line breaks preserve karne ke liye <br> me convert
-  const lines = text.split(/\r?\n/);
-  const fragment = document.createDocumentFragment();
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
 
-  lines.forEach((line, index) => {
-    fragment.appendChild(document.createTextNode(line));
-    if (index !== lines.length - 1) {
-      fragment.appendChild(document.createElement("br"));
-    }
-  });
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
 
-  range.insertNode(fragment);
+    // 🔥 line breaks preserve karne ke liye <br> me convert
+    const lines = text.split(/\r?\n/);
+    const fragment = document.createDocumentFragment();
 
-  // 🔥 cursor ko end me set karo
-  range.collapse(false);
-  selection.removeAllRanges();
-  selection.addRange(range);
+    lines.forEach((line, index) => {
+      fragment.appendChild(document.createTextNode(line));
+      if (index !== lines.length - 1) {
+        fragment.appendChild(document.createElement("br"));
+      }
+    });
 
-  updateDescription();
-};
+    range.insertNode(fragment);
+
+    // 🔥 cursor ko end me set karo
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    updateDescription();
+  };
 
 
 
@@ -699,87 +735,192 @@ const handlePaste = (e) => {
   //   document.execCommand(cmd, false, null);
   //   updateDescription();
   // };
-const exec = (cmd) => {
-  if (!editorRef.current) return;
-  editorRef.current.focus();
+  const exec = (cmd) => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
 
-  // Ensure selection exists
-  const sel = window.getSelection();
-  if (!sel.rangeCount) {
-    const range = document.createRange();
-    range.selectNodeContents(editorRef.current);
-    range.collapse(false);
-    sel.addRange(range);
-  }
+    // Ensure selection exists
+    const sel = window.getSelection();
+    if (!sel.rangeCount) {
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      range.collapse(false);
+      sel.addRange(range);
+    }
 
-  document.execCommand(cmd, false, null);
-  updateDescription();
-};
-
-
-
-
-
-// const handleKeyDown = (e) => {
-//   bullet list ke liye Enter allow
-//   if (e.key === "Enter") {
-//     document.execCommand("insertHTML", false, "<br>");
-//     return;
-//   }
-
-//   if (e.key === "Enter") {
-//   document.execCommand("insertHTML", false, "<li>&nbsp;</li>");
-//   e.preventDefault();
-//   return;
-// }
-
-
-//   if (
-//     charCount >= MAX_CHARS &&
-//     !["Backspace", "Delete", "ArrowLeft", "ArrowRight"].includes(e.key)
-//   ) {
-//     e.preventDefault();
-//   }
-// };
-
-
-
-
-const handleKeyDown = (e) => {
-  // ✅ Ctrl + A → manual select, BUT no preventDefault
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
-    const selection = window.getSelection();
-    const range = document.createRange();
-
-    range.selectNodeContents(editorRef.current);
-    selection.removeAllRanges();
-    selection.addRange(range);
-
-    return; // 👈 bas return, preventDefault nahi
-  }
-
-  // ✅ Ctrl + C / Ctrl + V / Ctrl + X → browser handle kare
-  if (e.ctrlKey || e.metaKey) {
-    return;
-  }
-
-
-  // character limit
-  if (
-    charCount >= MAX_CHARS &&
-    !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)
-  ) {
-    e.preventDefault();
-  }
-};
+    document.execCommand(cmd, false, null);
+    updateDescription();
+  };
 
 
 
 
 
+  // const handleKeyDown = (e) => {
+  //   bullet list ke liye Enter allow
+  //   if (e.key === "Enter") {
+  //     document.execCommand("insertHTML", false, "<br>");
+  //     return;
+  //   }
+
+  //   if (e.key === "Enter") {
+  //   document.execCommand("insertHTML", false, "<li>&nbsp;</li>");
+  //   e.preventDefault();
+  //   return;
+  // }
+
+
+  //   if (
+  //     charCount >= MAX_CHARS &&
+  //     !["Backspace", "Delete", "ArrowLeft", "ArrowRight"].includes(e.key)
+  //   ) {
+  //     e.preventDefault();
+  //   }
+  // };
 
 
 
+
+  // const handleKeyDown = (e) => {
+  //   // ✅ Ctrl + A → manual select, BUT no preventDefault
+  //   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+  //     const selection = window.getSelection();
+  //     const range = document.createRange();
+
+  //     range.selectNodeContents(editorRef.current);
+  //     selection.removeAllRanges();
+  //     selection.addRange(range);
+
+  //     return; // 👈 bas return, preventDefault nahi
+  //   }
+
+  //   // ✅ Ctrl + C / Ctrl + V / Ctrl + X → browser handle kare
+  //   if (e.ctrlKey || e.metaKey) {
+  //     return;
+  //   }
+  // };
+
+  //   // character limit
+  //  const handleKeyDown = (e) => {
+  //   // Ctrl + A
+  //   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+  //     const selection = window.getSelection();
+  //     const range = document.createRange();
+  //     range.selectNodeContents(editorRef.current);
+  //     selection.removeAllRanges();
+  //     selection.addRange(range);
+  //     return;
+  //   }
+
+  //   // Ctrl + C / V / X
+  //   if (e.ctrlKey || e.metaKey) {
+  //     return;
+  //   }
+  // };
+
+
+  // const handleKeyDown = (e) => {
+  //   // 🔥 ENTER key handling
+  //   if (e.key === "Enter") {
+  //     // ❗ bullet ON hai tabhi custom behaviour
+  //     if (isBulletOn) {
+  //       e.preventDefault();
+
+  //       const selection = window.getSelection();
+  //       if (!selection || selection.rangeCount === 0) return;
+
+  //       const range = selection.getRangeAt(0);
+
+  //       // new line
+  //       const br = document.createElement("br");
+  //       const bullet = document.createTextNode("• ");
+
+  //       range.insertNode(br);
+  //       range.insertNode(bullet);
+
+  //       // cursor bullet ke baad
+  //       range.setStartAfter(bullet);
+  //       range.collapse(true);
+  //       selection.removeAllRanges();
+  //       selection.addRange(range);
+
+  //       updateDescription();
+  //       return;
+  //     }
+
+  //     // ❗ bullet OFF hai → normal Enter
+  //     return;
+  //   }
+
+  //   // Ctrl + A (Select all)
+  //   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+  //     e.preventDefault();
+
+  //     const selection = window.getSelection();
+  //     const range = document.createRange();
+  //     range.selectNodeContents(editorRef.current);
+  //     selection.removeAllRanges();
+  //     selection.addRange(range);
+  //     return;
+  //   }
+
+  //   // Ctrl + C / V / X → browser handle kare
+  //   if (e.ctrlKey || e.metaKey) {
+  //     return;
+  //   }
+  // };
+
+
+
+
+
+
+
+  const handleKeyDown = (e) => {
+    // 🔹 ENTER → browser handle kare
+    if (e.key === "Enter") {
+      // bullet OFF → kuch nahi karna
+      if (!isBulletOn) return;
+
+      // bullet ON → next tick me bullet add hoga
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+
+        const range = selection.getRangeAt(0);
+
+        // agar cursor bilkul new line me hai
+        const bullet = document.createTextNode("• ");
+        range.insertNode(bullet);
+
+        range.setStartAfter(bullet);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        updateDescription();
+      }, 0);
+
+      return;
+    }
+
+    // Ctrl + A (Select all)
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+      e.preventDefault();
+
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return;
+    }
+
+    // Ctrl + C / V / X → browser handle kare
+    if (e.ctrlKey || e.metaKey) {
+      return;
+    }
+  };
 
 
 
@@ -842,15 +983,15 @@ const handleKeyDown = (e) => {
   return (
     <DashboardLayout title={jobToEdit ? "Edit Job" : "Post Job"}>
 
-{/* PAGE HEADING */}
-<div className="mb-8">
-  <h2 className="text-3xl font-bold text-slate-800 tracking-tight">
-    Post a New Job
-  </h2>
-  <p className="text-sm text-slate-500 mt-1">
-    Create and publish a job opening to hire the right candidates
-  </p>
-</div>
+      {/* PAGE HEADING */}
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-slate-800 tracking-tight">
+          Post a New Job
+        </h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Create and publish a job opening to hire the right candidates
+        </p>
+      </div>
 
 
 
@@ -1017,9 +1158,9 @@ const handleKeyDown = (e) => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <p className="font-medium">Job Description *</p>
-              <p className="text-xs text-gray-500">
+              {/* <p className="text-xs text-gray-500">
                 {charCount}/{MAX_CHARS}
-              </p>
+              </p> */}
             </div>
 
             {/* Editor toolbar (UI improve) */}
@@ -1046,69 +1187,102 @@ const handleKeyDown = (e) => {
                 Underline
               </button>
 
-<button
-  type="button"
-  onMouseDown={(e) => {
-    e.preventDefault();
-    editorRef.current?.focus();
 
-    const isActive = document.queryCommandState("insertUnorderedList");
 
-    if (isActive) {
-      // 🔴 BULLET OFF (PROPER EXIT)
-      document.execCommand("insertUnorderedList", false, null);
-      document.execCommand("insertParagraph", false, null);
-      setIsBulletOn(false);
-    } else {
-      // 🟢 BULLET ON (START FROM CURRENT LINE)
-      document.execCommand("insertUnorderedList", false, null);
-      setIsBulletOn(true);
-    }
 
-    updateDescription();
-  }}
-  className={`border px-3 py-1 rounded-lg text-sm flex items-center transition
-    ${
-      isBulletOn
-        ? "bg-indigo-600 text-white border-indigo-700"
-        : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
-    }
+
+
+
+
+
+
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+
+                  const editor = editorRef.current;
+                  if (!editor) return;
+
+                  editor.focus();
+
+                  const selection = window.getSelection();
+                  if (!selection || selection.rangeCount === 0) return;
+
+                  const range = selection.getRangeAt(0);
+
+                  if (isBulletOn) {
+                    // 🔴 BULLET OFF
+                    setIsBulletOn(false);
+                    return;
+                  }
+
+                  // 🟢 BULLET ON
+                  setIsBulletOn(true);
+
+                  // 👉 IMMEDIATELY insert bullet at cursor
+                  const bullet = document.createTextNode("• ");
+                  range.insertNode(bullet);
+
+                  // cursor bullet ke baad
+                  range.setStartAfter(bullet);
+                  range.collapse(true);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+
+                  updateDescription();
+                }}
+                className={`border px-3 py-1 rounded-lg text-sm flex items-center transition
+    ${isBulletOn
+                    ? "bg-indigo-600 text-white border-indigo-700"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
+                  }
   `}
-  title="Bullet List"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="9" y1="6" x2="21" y2="6" />
-    <line x1="9" y1="12" x2="21" y2="12" />
-    <line x1="9" y1="18" x2="21" y2="18" />
-    <circle cx="4" cy="6" r="1" />
-    <circle cx="4" cy="12" r="1" />
-    <circle cx="4" cy="18" r="1" />
-  </svg>
-</button>
+                title="Bullet List"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="9" y1="6" x2="21" y2="6" />
+                  <line x1="9" y1="12" x2="21" y2="12" />
+                  <line x1="9" y1="18" x2="21" y2="18" />
+                  <circle cx="4" cy="6" r="1" />
+                  <circle cx="4" cy="12" r="1" />
+                  <circle cx="4" cy="18" r="1" />
+                </svg>
+              </button>
+
+
+
+
+
+
+
+
+
 
 
             </div>
 
             <div
               ref={editorRef}
-  contentEditable
-  tabIndex={0}                // 🔥 VERY IMPORTANT
-  role="textbox"              // 🔥 accessibility + selection fix
-  className="border p-3 min-h-[160px] rounded-xl outline-none focus:ring-2 focus:ring-indigo-400"
-  onInput={updateDescription}
-  onKeyDown={handleKeyDown}
-  onPaste={handlePaste}
-  suppressContentEditableWarning
+              contentEditable
+              tabIndex={0}                // 🔥 VERY IMPORTANT
+              role="textbox"              // 🔥 accessibility + selection fix
+              className="border p-3 min-h-[160px] rounded-xl outline-none focus:ring-2 focus:ring-indigo-400"
+              onInput={handleInput}
+
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              suppressContentEditableWarning
             />
           </div>
 
@@ -1124,10 +1298,9 @@ const handleKeyDown = (e) => {
             onClick={submit}
             disabled={isLimitReached}
             className={`w-full px-6 py-3 rounded-xl font-semibold transition
-              ${
-                isLimitReached
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#7A004B] to-[#CC0047] text-white hover:opacity-95"
+              ${isLimitReached
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-gradient-to-r from-[#7A004B] to-[#CC0047] text-white hover:opacity-95"
               }
             `}
           >
@@ -1223,10 +1396,9 @@ function MultiSelect({ label, options, values, onChange }) {
                 )
               }
               className={`px-3 py-1 text-xs border rounded-full transition
-                ${
-                  active
-                    ? "bg-indigo-600 text-white border-indigo-600"
-                    : "bg-white hover:bg-gray-50"
+                ${active
+                  ? "bg-indigo-600 text-white border-indigo-600"
+                  : "bg-white hover:bg-gray-50"
                 }
               `}
             >
@@ -1266,7 +1438,7 @@ function TagInput({ label, values, input, setInput, onChange }) {
             onChange([...values, trimmed]);
             setInput("");
           }}
-         className="bg-gradient-to-r from-[#7A004B] to-[#CC0047] hover:opacity-95 text-white px-4 rounded-xl transition"
+          className="bg-gradient-to-r from-[#7A004B] to-[#CC0047] hover:opacity-95 text-white px-4 rounded-xl transition"
 
         >
           Add

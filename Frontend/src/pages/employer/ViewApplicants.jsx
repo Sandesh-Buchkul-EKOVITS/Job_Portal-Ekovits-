@@ -155,6 +155,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import DashboardLayout from "../../app/layouts/DashboardLayout";
 import { getCandidateProfile } from "../../app/services/profileService";
+import { useCurrentUser } from "../../app/auth/useCurrentUser";
+
 
 export default function ViewApplicants() {
   // 🔍 FILTER STATES
@@ -164,12 +166,29 @@ export default function ViewApplicants() {
   const [selectedJobId, setSelectedJobId] = useState("all");
 
 
+const { user } = useCurrentUser();
+
   const navigate = useNavigate();
   const { jobId } = useParams();
 
-  const jobs = JSON.parse(localStorage.getItem("jobs")) || [];
-  const applications =
-    JSON.parse(localStorage.getItem("applications")) || [];
+  // const jobs = JSON.parse(localStorage.getItem("jobs")) || [];
+  const allJobs = JSON.parse(localStorage.getItem("jobs")) || [];
+
+// ✅ Sirf employer ki company ke jobs
+const jobs = allJobs.filter(
+  (job) => job.employerId === user?.id
+);
+
+  // const applications =
+  //   JSON.parse(localStorage.getItem("applications")) || [];
+  const allApplications =
+  JSON.parse(localStorage.getItem("applications")) || [];
+
+// ✅ Sirf employer ke jobs ke applications
+const applications = allApplications.filter((app) =>
+  jobs.some((job) => String(job.id) === String(app.jobId))
+);
+
 
 
   const job = jobs.find(
@@ -188,14 +207,32 @@ last7Days.setDate(last7Days.getDate() - 7);
 
   //// addd onnn
   // 🔥 Sirf wahi jobs jinpe applicants aaye hain
-const appliedJobIds = [
-  ...new Set(applications.map((a) => String(a.jobId))),
-];
+// const appliedJobIds = [
+//   ...new Set(applications.map((a) => String(a.jobId))),
+// ];
 
-const appliedJobs = jobs.filter((job) =>
-  appliedJobIds.includes(String(job.id))
+// const appliedJobs = jobs.filter((job) =>
+//   appliedJobIds.includes(String(job.id))
+// );
+
+
+
+
+
+
+// ✅ Sirf current employer ki jobs jinpe applicants aaye hain
+// ✅ Sirf current employer ki jobs jinpe applicants aaye hain
+const employerJobs = jobs.filter(
+  (job) => String(job.employerId) === String(user?.id)
 );
 
+const employerJobIds = employerJobs.map((job) => String(job.id));
+
+const appliedJobs = employerJobs.filter((job) =>
+  applications.some(
+    (app) => String(app.jobId) === String(job.id)
+  )
+);
 
 
 
@@ -232,6 +269,38 @@ const appliedJobs = jobs.filter((job) =>
 
 
 
+// const filteredApplications = (jobId ? jobApplications : applications)
+//   .filter((app) => {
+//     // 🔹 Job dropdown filter
+//     if (
+//       selectedJobId !== "all" &&
+//       String(app.jobId) !== String(selectedJobId)
+//     ) {
+//       return false;
+//     }
+
+//     // 🔹 NEW = last 7 days applicants
+//     if (statusFilter === "new") {
+//       return new Date(app.appliedAt) >= last7Days;
+//     }
+
+//     // 🔹 Normal status filter
+//     if (statusFilter !== "all" && app.status !== statusFilter) {
+//       return false;
+//     }
+
+//     return true;
+//   })
+//   .sort((a, b) => {
+//     // 🔥 NEW me recent applicants upar
+//     if (statusFilter === "new") {
+//       return new Date(b.appliedAt) - new Date(a.appliedAt);
+//     }
+//     return 0;
+//   });
+
+
+
 const filteredApplications = (jobId ? jobApplications : applications)
   .filter((app) => {
     // 🔹 Job dropdown filter
@@ -242,24 +311,23 @@ const filteredApplications = (jobId ? jobApplications : applications)
       return false;
     }
 
-    // 🔹 NEW = last 7 days applicants
-    if (statusFilter === "new") {
-      return new Date(app.appliedAt) >= last7Days;
-    }
-
-    // 🔹 Normal status filter
-    if (statusFilter !== "all" && app.status !== statusFilter) {
+    // 🔹 Normal status filter (NEW ko chhod ke)
+    if (
+      statusFilter !== "all" &&
+      statusFilter !== "new" &&
+      app.status !== statusFilter
+    ) {
       return false;
     }
 
-    return true;
+    return true; // ❗ koi applicant hide nahi hoga
   })
   .sort((a, b) => {
-    // 🔥 NEW me recent applicants upar
+    // 🔥 NEW = recent applicants upar
     if (statusFilter === "new") {
       return new Date(b.appliedAt) - new Date(a.appliedAt);
     }
-    return 0;
+    return 0; // baaki sab me order same
   });
 
 
