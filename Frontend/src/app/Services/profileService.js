@@ -86,6 +86,25 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const API_BASE = "http://localhost:5000/api/candidate-profile";
 
 // GET PROFILE FROM BACKEND
