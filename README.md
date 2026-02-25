@@ -147,7 +147,40 @@ CREATE DATABASE jobportal;
 
 3. Update credentials in `.env`
 4. Ensure all required tables are created before running the app.
+5.🗄 Database Schema Setup
 
+A schema.sql file has been added to the project.
+
+To create all required database tables:
+
+Open PostgreSQL (pgAdmin)
+
+Connect to jobportal database
+
+Open Query Tool
+
+Copy and execute contents of schema.sql
+
+OR
+
+Run via terminal:
+
+psql -U postgres -d jobportal -f schema.sql
+
+
+This will create:
+
+users
+
+candidate_profile
+
+employer_profile
+
+jobs
+
+applications
+
+saved_jobs
 ---
 
 # 🔗 API Base URL
