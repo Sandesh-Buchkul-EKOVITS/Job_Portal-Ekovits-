@@ -141,10 +141,19 @@ useEffect(() => {
             {app.location}
           </p>
 
-          <p className="text-xs text-gray-500">
+          {/* <p className="text-xs text-gray-500">
             Applied on{" "}
             {new Date(app.created_at).toLocaleDateString()}
-          </p>
+       
+
+          </p> */}
+          <p className="text-xs text-gray-500">
+  Applied on{" "}
+  {app.applied_at
+    ? new Date(app.applied_at).toLocaleDateString()
+    : "N/A"}
+</p>
+
         </div>
 
         <span
