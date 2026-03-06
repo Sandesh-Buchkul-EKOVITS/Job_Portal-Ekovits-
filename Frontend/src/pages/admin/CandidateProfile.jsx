@@ -1,10 +1,12 @@
 import DashboardLayout from "../../app/layouts/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { getCandidateProfile } from "../../app/services/profileService";
 
 export default function CandidateProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  
 
   const currentUser = JSON.parse(
     localStorage.getItem("currentUser")
@@ -22,43 +24,76 @@ export default function CandidateProfile() {
   }
 
   /* ---------- FIXED ID MATCH ---------- */
-  const users =
-    JSON.parse(localStorage.getItem("users")) || [];
 
-  const baseUser = users.find(
-    (u) => String(u.id) === String(id)
+
+  // const users =
+  //   JSON.parse(localStorage.getItem("users")) || [];
+
+  // const baseUser = users.find(
+  //   (u) => String(u.id) === String(id)
+  // );
+
+  // const savedProfile =
+  //   getCandidateProfile(id) || {};
+
+
+  const [profile, setProfile] = useState(null);
+
+useEffect(() => {
+  const fetchProfile = async () => {
+    const data = await getCandidateProfile(id);
+    setProfile(data);
+  };
+
+  fetchProfile();
+}, [id]);
+
+
+
+
+
+
+if (!profile) {
+  return (
+    <DashboardLayout title="Candidate Profile">
+      <div className="bg-white p-6 rounded shadow">
+        Loading...
+      </div>
+    </DashboardLayout>
   );
+}
 
-  const savedProfile =
-    getCandidateProfile(id) || {};
 
-  if (!baseUser) {
-    return (
-      <DashboardLayout title="Candidate Profile">
-        <div className="bg-white p-6 rounded shadow">
-          Candidate not found.
-        </div>
-      </DashboardLayout>
-    );
-  }
+
+
+
+  // if (!baseUser) {
+  //   return (
+  //     <DashboardLayout title="Candidate Profile">
+  //       <div className="bg-white p-6 rounded shadow">
+  //         Candidate not found.
+  //       </div>
+  //     </DashboardLayout>
+  //   );
+  // }
 
   /* ---------- MERGED VIEW MODEL ---------- */
-  const profile = {
-    id,
-    name: savedProfile.name || baseUser.name || "N/A",
-    email: savedProfile.email || baseUser.email || "N/A",
-    phone: savedProfile.phone || baseUser.phone || "N/A",
-    location: savedProfile.location || "",
-    currentCTC: savedProfile.currentCTC || "",
-    summary: savedProfile.summary || "",
-    skills: savedProfile.skills || [],
-    experience: savedProfile.experience || [],
-    education: savedProfile.education || [],
-    resume: savedProfile.resume || null,
-    photo: savedProfile.photo || "",
-    profileCompleted:
-      savedProfile.profileCompleted ?? false,
-  };
+  // const profile = {
+  //   id,
+  //   name: savedProfile.name || baseUser.name || "N/A",
+  //   email: savedProfile.email || baseUser.email || "N/A",
+  //   phone: savedProfile.phone || baseUser.phone || "N/A",
+  //   location: savedProfile.location || "",
+  //   currentCTC: savedProfile.currentCTC || "",
+  //   summary: savedProfile.summary || "",
+  //   skills: savedProfile.skills || [],
+  //   experience: savedProfile.experience || [],
+  //   education: savedProfile.education || [],
+  //   resume: savedProfile.resume || null,
+  //   photo: savedProfile.photo || "",
+  //   profileCompleted:
+  //     savedProfile.profileCompleted ?? false,
+  // };
 
   return (
     <DashboardLayout title="Candidate Profile">

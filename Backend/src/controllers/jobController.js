@@ -245,18 +245,20 @@ exports.closeJob = async (req, res) => {
 // ✅ Get All Active Jobs (Public)
 exports.getAllJobs = async (req, res) => {
   try {
+
     const result = await pool.query(
-      "SELECT * FROM jobs ORDER BY created_at DESC"
+      "SELECT * FROM jobs WHERE status='approved' ORDER BY created_at DESC"
     );
 
-    res.json({ success: true, jobs: result.rows });
+    res.json({
+      success: true,
+      jobs: result.rows
+    });
 
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ success: false });
+    res.status(500).json({ success:false });
   }
 };
-
 
 
 

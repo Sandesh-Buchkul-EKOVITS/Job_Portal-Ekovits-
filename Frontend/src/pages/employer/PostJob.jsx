@@ -1103,7 +1103,7 @@ const method = editJobId ? "PUT" : "POST";
         {/* Top Plan Banner */}
         <div className="rounded-2xl p-5 text-white shadow bg-gradient-to-r from-[#7A004B] to-[#CC0047]">
 
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold">
                 Current Plan: {currentPlan}
@@ -1114,12 +1114,12 @@ const method = editJobId ? "PUT" : "POST";
             </div>
 
             {!jobToEdit && (
-              <button
-                onClick={() => navigate("/employer/subscription")}
-                className="bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition"
-              >
-                Upgrade Plan
-              </button>
+             <button
+  onClick={() => navigate("/employer/subscription")}
+  className="bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition w-full sm:w-auto text-center"
+>
+  Upgrade Plan
+</button>
             )}
           </div>
         </div>

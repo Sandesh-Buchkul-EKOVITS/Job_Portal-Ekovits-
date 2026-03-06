@@ -88,6 +88,28 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const pool = require("../config/db");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
@@ -181,21 +203,28 @@ if (role === "employer") {
 
 
 exports.login = async (req, res) => {
-  const { email, password, role } = req.body;
+  console.log("LOGIN BODY:", req.body);
+  const { email, password } = req.body;
 
   try {
-    const result = await pool.query(
-      "SELECT id, email, role, name, password, plan FROM users WHERE email=$1 AND role=$2",
-      [email, role]
-    );
+   const result = await pool.query(
+ "SELECT id, email, role, name, password, plan FROM users WHERE email=$1",
+ [email]
+);
 
+console.log("DB USER:", result.rows);
     if (result.rows.length === 0) {
       return res.status(400).json({ success: false, message: "User not found" });
     }
 
-    const user = result.rows[0];
+const user = result.rows[0];
 
-    const match = await bcrypt.compare(password, user.password);
+console.log("PASSWORD ENTERED:", password);
+console.log("HASH FROM DB:", user.password);
+
+const match = await bcrypt.compare(password, user.password);
+
+console.log("PASSWORD MATCH:", match);
     if (!match) {
       return res.status(400).json({ success: false, message: "Wrong password" });
     }

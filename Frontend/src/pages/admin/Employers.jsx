@@ -431,39 +431,38 @@ const handleVerify = async (emp) => {
                       : "Active"}
                   </td>
 
-                  <td className="p-3 space-x-3 whitespace-nowrap">
-                    <button
-                      onClick={() =>
-                        navigate(
-                          `/admin/employer/${emp.id}`
-                        )
-                      }
-                      className="text-blue-600 text-xs underline"
-                    >
-                      View Profile
-                    </button>
+        <td className="p-3 whitespace-nowrap">
+  <div className="flex items-center gap-2 h-full">
 
-                    <button
-                      onClick={() =>
-                        handleVerify(emp)
-                      }
-                      className="text-xs underline text-green-600"
-                    >
-                      {emp.verified ? "Unverify" : "Verify"}
+<button
+  onClick={() =>
+    navigate(`/admin/employer/${emp.id}`)
+  }
+  className="bg-blue-600 text-white text-xs px-3 py-1 rounded"
+>
+  View Profile
+</button>
 
-                    </button>
+<button
+  onClick={() =>
+    handleVerify(emp)
+  }
+  className="bg-green-600 text-white text-xs px-3 py-1 rounded"
+>
+  {emp.verified ? "Unverify" : "Verify"}
+</button>
 
-                    <button
-                      onClick={() =>
-                        toggleBlock(emp.id)
-                      }
-                      className="text-xs underline text-red-600"
-                    >
-                      {emp.blocked
-                        ? "Unblock"
-                        : "Block"}
-                    </button>
-                  </td>
+<button
+  onClick={() =>
+    toggleBlock(emp.id)
+  }
+  className="bg-red-600 text-white text-xs px-3 py-1 rounded"
+>
+  {emp.blocked ? "Unblock" : "Block"}
+</button>
+
+  </div>
+</td>
                 </tr>
               );
             })}

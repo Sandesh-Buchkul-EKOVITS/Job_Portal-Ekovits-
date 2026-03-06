@@ -45,6 +45,7 @@ import AdminUsers from "../pages/admin/Users";
 import AdminCandidates from "../pages/admin/Candidates";
 import AdminCandidateProfile from "../pages/admin/CandidateProfile";
 import AdminJobs from "../pages/admin/Jobs";
+import JobModeration from "../pages/admin/JobModeration";
 import AdminEmployers from "../pages/admin/Employers";
 import AdminEmployerProfile from "../pages/admin/EmployerProfile";
 // import RequireAdmin from "./app/guards/RequireAdmin";
@@ -287,7 +288,7 @@ export default function App() {
         path="/admin/jobs"
         element={
           <RequireRole allowedRoles={["admin"]}>
-            <AdminJobs />
+                <JobModeration />
           </RequireRole>
         }
       />

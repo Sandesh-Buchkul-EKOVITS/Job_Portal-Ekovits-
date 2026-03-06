@@ -115,6 +115,12 @@
 
 
 
+
+
+
+
+
+
 import DashboardLayout from "../../app/layouts/DashboardLayout";
 import { useEffect, useState } from "react";
 
@@ -147,13 +153,34 @@ export default function AdminCandidates() {
     <DashboardLayout title="Candidates">
       <div className="space-y-4">
         {candidates.map((c) => (
-          <div
-            key={c.id}
-            className="bg-white p-5 rounded shadow"
-          >
-            <p className="font-semibold">{c.name}</p>
-            <p className="text-sm">{c.email}</p>
-          </div>
+
+
+          // <div
+          //   key={c.id}
+          //   className="bg-white p-5 rounded shadow"
+          // >
+          //   <p className="font-semibold">{c.name}</p>
+          //   <p className="text-sm">{c.email}</p>
+          // </div>
+<div
+  key={c.id}
+  className="bg-white p-5 rounded shadow flex justify-between items-center"
+>
+  <div>
+    <p className="font-semibold">{c.name}</p>
+    <p className="text-sm">{c.email}</p>
+  </div>
+
+  <button
+  onClick={() => window.location.href = `/admin/candidate/${c.id}`}
+  className="bg-blue-600 text-white text-xs px-3 py-1 rounded"
+>
+  View Profile
+</button>
+
+</div>
+
+
         ))}
       </div>
     </DashboardLayout>

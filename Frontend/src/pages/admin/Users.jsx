@@ -236,6 +236,35 @@ export default function AdminUsers() {
     }
   };
 
+
+
+
+  const resetPassword = async (userId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `http://localhost:5000/api/admin/users/${userId}/reset-password`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert(
+        `Temporary password: ${data.tempPassword}\nPlease share securely with user.`
+      );
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
   const deleteUser = async (userId) => {
     if (!window.confirm("Delete this user permanently?")) return;
 
@@ -303,6 +332,9 @@ export default function AdminUsers() {
                 )}
               </div>
 
+
+
+{/* 
               <div className="flex gap-4 text-sm">
                 <button
                   onClick={() => toggleBlock(user.id)}
@@ -319,7 +351,35 @@ export default function AdminUsers() {
                     Delete
                   </button>
                 )}
-              </div>
+              </div> */}
+<div className="flex gap-2 text-sm">
+
+<button
+  onClick={() => resetPassword(user.id)}
+  className="bg-blue-600 text-white text-xs px-3 py-1 rounded"
+>
+  Reset Password
+</button>
+
+<button
+  onClick={() => toggleBlock(user.id)}
+  className="bg-yellow-500 text-white text-xs px-3 py-1 rounded"
+>
+  {user.blocked ? "Unblock" : "Block"}
+</button>
+
+{user.role !== "admin" && (
+<button
+  onClick={() => deleteUser(user.id)}
+  className="bg-red-600 text-white text-xs px-3 py-1 rounded"
+>
+  Delete
+</button>
+)}
+
+</div>
+
+
             </div>
           ))
         )}

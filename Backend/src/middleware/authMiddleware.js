@@ -80,14 +80,39 @@ console.log("JWT SECRET:", process.env.JWT_SECRET);
   Example: allow only employer
 */
 
-exports.requireRole = (role) => {
+// exports.requireRole = (role) => {
+//   return (req, res, next) => {
+//     if (!req.user || req.user.role !== role) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Access denied"
+//       });
+//     }
+//     next();
+//   };
+// };
+
+
+
+
+
+
+exports.requireRole = (roles) => {
   return (req, res, next) => {
-    if (!req.user || req.user.role !== role) {
+
+    // agar single role hai to array bana do
+    if (!Array.isArray(roles)) {
+      roles = [roles];
+    }
+
+    // user role check
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: "Access denied"
       });
     }
+
     next();
   };
 };

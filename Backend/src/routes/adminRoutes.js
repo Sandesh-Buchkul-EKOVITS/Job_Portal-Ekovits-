@@ -55,12 +55,43 @@ router.put(
 );
 
 
+
+router.delete(
+  "/jobs/:id",
+  verifyToken,
+  requireRole("admin"),
+  controller.deleteJob
+);
+
 /* ================= GET ALL USERS ================= */
 router.get(
   "/users",
   verifyToken,
   requireRole("admin"),
   controller.getAllUsers
+);
+/* ================= BLOCK / UNBLOCK USER ================= */
+router.put(
+  "/users/:id/block",
+  verifyToken,
+  requireRole("admin"),
+  controller.toggleUserBlock
+);
+
+/* ================= RESET PASSWORD ================= */
+router.put(
+  "/users/:id/reset-password",
+  verifyToken,
+  requireRole("admin"),
+  controller.resetUserPassword
+);
+
+/* ================= DELETE USER ================= */
+router.delete(
+  "/users/:id",
+  verifyToken,
+  requireRole("admin"),
+  controller.deleteUser
 );
 
 /* ================= GET ALL CANDIDATES ================= */

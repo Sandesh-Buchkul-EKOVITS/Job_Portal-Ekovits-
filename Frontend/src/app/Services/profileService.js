@@ -108,11 +108,11 @@
 const API_BASE = "http://localhost:5000/api/candidate-profile";
 
 // GET PROFILE FROM BACKEND
-export async function getCandidateProfile() {
+export async function getCandidateProfile(id) {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(API_BASE, {
+  const res = await fetch(`${API_BASE}/view/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -22,7 +22,7 @@ router.post(
 router.get(
   "/view/:id",
   verifyToken,
-  requireRole("employer"),
+requireRole(["employer", "admin"]),
   controller.getCandidateProfileById
 );
 

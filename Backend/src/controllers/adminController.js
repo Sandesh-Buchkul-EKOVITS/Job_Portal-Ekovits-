@@ -68,6 +68,29 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const pool = require("../config/db");
 
 
@@ -230,21 +253,24 @@ const verifyEmployer = async (req, res) => {
 /* ================= GET ALL JOBS ================= */
 const getAllJobs = async (req, res) => {
   try {
+
     const { status } = req.query;
 
     let query = `
-      SELECT j.*, u.name AS employer_name
+      SELECT 
+        j.*,
+        ep.company_name
       FROM jobs j
-      LEFT JOIN users u ON j.employer_id = u.id
+      LEFT JOIN employer_profile ep
+      ON j.employer_id = ep.employer_id
     `;
 
     let values = [];
 
-   if (status) {
-  query += " WHERE LOWER(j.status) = LOWER($1)";
-  values.push(status);
-}
-
+    if (status && status !== "all") {
+      query += " WHERE LOWER(j.status) = LOWER($1)";
+      values.push(status);
+    }
 
     query += " ORDER BY j.id DESC";
 
@@ -257,10 +283,12 @@ const getAllJobs = async (req, res) => {
 
   } catch (err) {
     console.error("Get Jobs Error:", err);
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
   }
 };
-
 
 /* ================= UPDATE JOB STATUS ================= */
 const updateJobStatus = async (req, res) => {
@@ -280,6 +308,7 @@ const updateJobStatus = async (req, res) => {
     res.status(500).json({ success: false });
   }
 };
+
 
 
 
@@ -326,6 +355,85 @@ const getAllCandidates = async (req, res) => {
     res.status(500).json({ success: false });
   }
 };
+
+const toggleUserBlock = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const result = await pool.query(
+      "SELECT blocked FROM users WHERE id=$1",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ success:false });
+    }
+
+    const blocked = result.rows[0].blocked;
+
+    await pool.query(
+      "UPDATE users SET blocked=$1 WHERE id=$2",
+      [!blocked, id]
+    );
+
+    res.json({ success:true });
+
+  } catch (err) {
+    console.log("BLOCK USER ERROR:", err);
+    res.status(500).json({ success:false });
+  }
+};
+
+
+
+const bcrypt = require("bcrypt");
+
+const resetUserPassword = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const tempPassword = Math.random().toString(36).slice(-8);
+
+    const hash = await bcrypt.hash(tempPassword, 10);
+
+    await pool.query(
+      "UPDATE users SET password=$1 WHERE id=$2",
+      [hash, id]
+    );
+
+    res.json({
+      success:true,
+      tempPassword
+    });
+
+  } catch (err) {
+    console.log("RESET PASSWORD ERROR:", err);
+    res.status(500).json({ success:false });
+  }
+};
+
+
+
+const deleteUser = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    await pool.query(
+      "DELETE FROM users WHERE id=$1",
+      [id]
+    );
+
+    res.json({ success:true });
+
+  } catch (err) {
+    console.log("DELETE USER ERROR:", err);
+    res.status(500).json({ success:false });
+  }
+};
+
 
 
 
@@ -411,8 +519,28 @@ const getPlanUpgradeRequests = async (req, res) => {
   }
 };
 
+const deleteJob = async (req, res) => {
+  try {
 
+    const { id } = req.params;
 
+    await pool.query(
+      "DELETE FROM jobs WHERE id=$1",
+      [id]
+    );
+
+    res.json({
+      success: true,
+      message: "Job deleted"
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success:false
+    });
+  }
+};
 
 module.exports = {
   getDashboardStats,
@@ -424,6 +552,10 @@ updateJobStatus,
   getAllUsers,
   getSingleEmployer,
   getAllCandidates,
-  getPlanUpgradeRequests
+  getPlanUpgradeRequests,
+   toggleUserBlock,
+  resetUserPassword,
+  deleteJob,
+  deleteUser
 
 };

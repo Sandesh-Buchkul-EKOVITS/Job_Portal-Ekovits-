@@ -445,6 +445,11 @@ export default function ApplyJob() {
     <DashboardLayout title="Apply Job">
       <div className="bg-white p-6 rounded shadow space-y-4 max-w-3xl mx-auto">
         <h2 className="text-xl font-semibold">{job.title}</h2>
+        {job.alreadyApplied && (
+<p className="text-xs text-blue-600 mt-1">
+Already Applied
+</p>
+)}
         <p className="text-gray-600">{job.company_name}</p>
 
         <p className="text-sm text-gray-500">
