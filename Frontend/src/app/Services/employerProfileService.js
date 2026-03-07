@@ -161,14 +161,21 @@ export async function getEmployerProfile() {
     const token = localStorage.getItem("token");
 
     if (!token) return null;
+const res = await fetch(BASE_URL, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-    const res = await fetch(BASE_URL, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+/* 🔐 AUTO LOGOUT CHECK */
+if (res.status === 401) {
+  localStorage.removeItem("token");
+  localStorage.removeItem("currentUser");
+  window.location.href = "/login";
+  return null;
+}
 
-    const data = await res.json();
+const data = await res.json();
 
     if (data.success) {
       return data.profile;
@@ -187,16 +194,24 @@ export async function saveEmployerProfile(profile) {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(BASE_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(profile),
-    });
+   const res = await fetch(BASE_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify(profile),
+});
 
-    const data = await res.json();
+/* 🔐 AUTO LOGOUT CHECK */
+if (res.status === 401) {
+  localStorage.removeItem("token");
+  localStorage.removeItem("currentUser");
+  window.location.href = "/login";
+  return false;
+}
+
+const data = await res.json();
 
     return data.success;
   } catch (error) {
@@ -211,17 +226,25 @@ export async function requestVerification() {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(
-      `${BASE_URL}/request-verification`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+   const res = await fetch(
+  `${BASE_URL}/request-verification`,
+  {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
-    const data = await res.json();
+/* 🔐 AUTO LOGOUT CHECK */
+if (res.status === 401) {
+  localStorage.removeItem("token");
+  localStorage.removeItem("currentUser");
+  window.location.href = "/login";
+  return false;
+}
+
+const data = await res.json();
     return data.success;
   } catch (error) {
     console.error("Verification request failed:", error);

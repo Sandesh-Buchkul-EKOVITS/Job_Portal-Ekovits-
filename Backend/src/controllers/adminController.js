@@ -416,28 +416,82 @@ const resetUserPassword = async (req, res) => {
 
 
 
+// const deleteUser = async (req, res) => {
+//   try {
+
+//     const { id } = req.params;
+
+//     await pool.query(
+//       "DELETE FROM users WHERE id=$1",
+//       [id]
+//     );
+
+//     res.json({ success:true });
+
+//   } catch (err) {
+//     console.log("DELETE USER ERROR:", err);
+//     res.status(500).json({ success:false });
+//   }
+// };
+
+
+
+
+// exports.deleteUser = async (req, res) => {
+
+//   try {
+
+//     const userId = req.params.id;
+
+//     await pool.query(
+//       "DELETE FROM users WHERE id=$1",
+//       [userId]
+//     );
+
+//     res.json({
+//       success: true,
+//       message: "User deleted"
+//     });
+
+//   } catch (err) {
+
+//     console.log(err);
+
+//     res.status(500).json({
+//       success:false
+//     });
+
+//   }
+
+// };
+
 const deleteUser = async (req, res) => {
+
   try {
 
-    const { id } = req.params;
+    const userId = req.params.id;
 
     await pool.query(
       "DELETE FROM users WHERE id=$1",
-      [id]
+      [userId]
     );
 
-    res.json({ success:true });
+    res.json({
+      success: true,
+      message: "User deleted"
+    });
 
   } catch (err) {
+
     console.log("DELETE USER ERROR:", err);
-    res.status(500).json({ success:false });
+
+    res.status(500).json({
+      success:false
+    });
+
   }
+
 };
-
-
-
-
-
 
 
 

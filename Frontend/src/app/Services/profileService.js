@@ -112,12 +112,19 @@ export async function getCandidateProfile(id) {
   try {
     const token = localStorage.getItem("token");
 
-  const res = await fetch(`${API_BASE}/view/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+ const res = await fetch(`${API_BASE}/view/${id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
+/* 🔐 AUTO LOGOUT CHECK */
+if (res.status === 401) {
+  localStorage.removeItem("token");
+  localStorage.removeItem("currentUser");
+  window.location.href = "/login";
+  return null;
+}
     const data = await res.json();
 
     if (data.success) {

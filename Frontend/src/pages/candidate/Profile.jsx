@@ -39,6 +39,7 @@ export default function CandidateProfile() {
   };
 
   const [profile, setProfile] = useState(emptyProfile);
+  
   const [draft, setDraft] = useState(emptyProfile);
   const [editMode, setEditMode] = useState(false);
 
@@ -58,7 +59,42 @@ export default function CandidateProfile() {
 // }, [userId]);
 
 
+/* 🔐 AUTO LOGOUT CHECK */
+useEffect(() => {
 
+  const checkUser = async () => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        "http://localhost:5000/api/auth/me",
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+
+      if(res.status === 401){
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+
+        window.location.href="/login";
+
+      }
+
+    } catch(err){
+      console.log(err);
+    }
+
+  };
+
+  checkUser();
+
+},[]);
 
 
 

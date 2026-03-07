@@ -640,6 +640,42 @@ export default function EmployerDashboard() {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
   const [profile, setProfile] = useState(null);
+  /* 🔐 AUTO LOGOUT CHECK */
+useEffect(() => {
+
+  const checkUser = async () => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        "http://localhost:5000/api/auth/me",
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+
+      if(res.status === 401){
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+
+        window.location.href="/login";
+
+      }
+
+    } catch(err){
+      console.log(err);
+    }
+
+  };
+
+  checkUser();
+
+},[]);
 
 useEffect(() => {
   const fetchProfile = async () => {

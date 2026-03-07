@@ -296,13 +296,21 @@ export default function JobCard({ job }) {
         const token = localStorage.getItem("token");
 
         const res = await fetch(
-          "http://localhost:5000/api/saved-jobs",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  "http://localhost:5000/api/saved-jobs",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+
+/* 🔐 AUTO LOGOUT CHECK */
+if (res.status === 401) {
+  localStorage.removeItem("token");
+  localStorage.removeItem("currentUser");
+  window.location.href = "/login";
+  return;
+}
 
         const data = await res.json();
 

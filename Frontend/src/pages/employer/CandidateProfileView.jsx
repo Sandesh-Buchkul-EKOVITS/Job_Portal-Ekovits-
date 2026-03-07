@@ -189,11 +189,98 @@ import DashboardLayout from "../../app/layouts/DashboardLayout";
 import { useEffect, useState } from "react";
 
 export default function EmployerCandidateProfileView() {
-  const { id } = useParams(); // candidate userId
+  // const { id } = useParams(); // candidate userId
+  const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  /* 🔐 AUTH CHECK + GET USER ID */
+useEffect(() => {
+
+  const getUser = async () => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const res = await fetch(
+        "http://localhost:5000/api/auth/me",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+        window.location.href = "/login";
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data.success) {
+        setUserId(data.user.id);
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+
+  };
+
+  getUser();
+
+}, []);
+
+
+useEffect(() => {
+
+  const checkUser = async () => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      if(!token) return;
+
+      const res = await fetch(
+        "http://localhost:5000/api/auth/me",
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+
+      if(res.status === 401){
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+
+        window.location.href="/login";
+
+      }
+
+    } catch(err){
+      console.log(err);
+    }
+
+  };
+
+  checkUser();
+
+},[]);
+
+
+
+
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -201,7 +288,7 @@ export default function EmployerCandidateProfileView() {
         const token = localStorage.getItem("token");
 
         const res = await fetch(
-          `http://localhost:5000/api/candidate-profile/view/${id}`,
+          `http://localhost:5000/api/candidate-profile/view/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -250,7 +337,7 @@ setProfile(data.profile);
     };
 
     fetchProfile();
-  }, [id]);
+  }, [userId]);
 
   if (loading) {
     return (

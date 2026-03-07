@@ -46,7 +46,7 @@
 
 //             Jobs Posted by You
 //           </h2>
-          
+
 //           <button
 //             onClick={() => navigate("/employer/post-job")}
 //             className="bg-gradient-to-r from-[#7A004B] to-[#CC0047] text-white px-4 py-2 rounded"
@@ -158,13 +158,23 @@ import { FaShareAlt } from "react-icons/fa";
 
 export default function MyJobs() {
   const navigate = useNavigate();
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  // const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const [currentUser, setCurrentUser] = useState(null);
 
   const [jobs, setJobs] = useState([]);
   const [applicantCounts, setApplicantCounts] = useState({});
 
-  // 🔐 Session check
-  if (!currentUser || currentUser.role !== "employer") {
+ 
+// if (!currentUser) {
+//   return (
+//     <DashboardLayout title="My Jobs">
+//       <div className="bg-white p-6 rounded shadow">
+//         Loading jobs...
+//       </div>
+//     </DashboardLayout>
+//   );
+// }
+if (currentUser && currentUser.role !== "employer") {
     return (
       <DashboardLayout title="My Jobs">
         <div className="bg-white p-6 rounded shadow">
@@ -173,15 +183,135 @@ export default function MyJobs() {
       </DashboardLayout>
     );
   }
+useEffect(() => {
 
+  const fetchUser = async () => {
+
+    try{
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        "http://localhost:5000/api/auth/me",
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+
+      if(res.status === 401){
+
+        localStorage.removeItem("token");
+        window.location.href="/login";
+        return;
+
+      }
+
+      const data = await res.json();
+
+      if(data.success){
+        setCurrentUser(data.user);
+      }
+
+    }catch(err){
+      console.log(err);
+    }
+
+  };
+
+  fetchUser();
+
+},[]);
   // ✅ Fetch Jobs from DB
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const token = localStorage.getItem("token");
+//   useEffect(() => {
+//     const fetchJobs = async () => {
+//       try {
+//         const token = localStorage.getItem("token");
 
+//       const res = await fetch(
+//   "http://localhost:5000/api/jobs/my-jobs",
+//   {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   }
+// );
+
+// /* 🔴 AUTO LOGOUT CHECK */
+// if (res.status === 401) {
+//   localStorage.removeItem("token");
+//   localStorage.removeItem("currentUser");
+//   window.location.href = "/login";
+//   return;
+// }
+
+// const data = await res.json();
+//         if (data.success) {
+//           setJobs(data.jobs);
+//           fetchApplicantCounts(data.jobs);
+//         }
+//       } catch (err) {
+//         console.log(err);
+//       }
+//     };
+
+//     fetchJobs();
+//   }, []);
+// ✅ Fetch Jobs from DB
+useEffect(() => {
+
+  if (!currentUser) return;
+
+  const fetchJobs = async () => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        "http://localhost:5000/api/jobs/my-jobs",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+        window.location.href = "/login";
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data.success) {
+        setJobs(data.jobs);
+        fetchApplicantCounts(data.jobs);
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+
+  };
+
+  fetchJobs();
+
+}, [currentUser]);
+
+
+  const fetchApplicantCounts = async (jobsList) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const counts = {};
+
+      for (const job of jobsList) {
         const res = await fetch(
-          "http://localhost:5000/api/jobs/my-jobs",
+          `http://localhost:5000/api/applications/job/${job.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -192,47 +322,15 @@ export default function MyJobs() {
         const data = await res.json();
 
         if (data.success) {
-          setJobs(data.jobs);
-            fetchApplicantCounts(data.jobs); 
+          counts[job.id] = data.total;
         }
-      } catch (err) {
-        console.log(err);
       }
-    };
 
-    fetchJobs();
-  }, []);
-
-
-
-  const fetchApplicantCounts = async (jobsList) => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const counts = {};
-
-    for (const job of jobsList) {
-      const res = await fetch(
-        `http://localhost:5000/api/applications/job/${job.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        counts[job.id] = data.total;
-      }
+      setApplicantCounts(counts);
+    } catch (err) {
+      console.log(err);
     }
-
-    setApplicantCounts(counts);
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
 
   // ✅ Close Job (DELETE API)
   // const closeJob = async (jobId) => {
@@ -261,29 +359,53 @@ export default function MyJobs() {
 
 
 
-const closeJob = async (jobId) => {
-  try {
-    const token = localStorage.getItem("token");
+  const closeJob = async (jobId) => {
+    try {
+      const token = localStorage.getItem("token");
 
-    await fetch(`http://localhost:5000/api/jobs/close/${jobId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      await fetch(`http://localhost:5000/api/jobs/close/${jobId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    window.location.reload();
+      window.location.reload();
 
-  } catch (err) {
-    console.log(err);
-  }
-};
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-const shareJob = async (job) => {
 
-  const url = `${window.location.origin}/jobs/${job.id}`;
 
-  const text = `
+  const openJob = async (jobId) => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      await fetch(`http://localhost:5000/api/jobs/open/${jobId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      window.location.reload();
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+  const shareJob = async (job) => {
+
+    const url = `${window.location.origin}/jobs/${job.id}`;
+
+    const text = `
 Role: ${job.title}
 Company: ${job.company_name}
 Location: ${job.location}
@@ -297,37 +419,46 @@ Apply here:
 ${url}
 `;
 
-  try {
+    try {
 
-    if (navigator.share) {
+      if (navigator.share) {
 
-      await navigator.share({
-        title: job.title,
-        text: text,
-        url: url
-      });
+        await navigator.share({
+          title: job.title,
+          text: text,
+          url: url
+        });
 
-    } else {
+      } else {
 
-      navigator.clipboard.writeText(`${text}\n${url}`);
-      alert("Job details copied. You can paste and share.");
+        navigator.clipboard.writeText(`${text}\n${url}`);
+        alert("Job details copied. You can paste and share.");
 
+      }
+
+    } catch (err) {
+      console.log(err);
     }
-
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
 
 
 
 
 
-
+if (!currentUser) {
+  return (
+    <DashboardLayout title="My Jobs">
+      <div className="bg-white p-6 rounded shadow">
+        Loading jobs...
+      </div>
+    </DashboardLayout>
+  );
+}
 
 
   return (
     <DashboardLayout title="My Jobs">
+      
       <div className="max-w-5xl mx-auto space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-3xl font-bold text-slate-800 tracking-tight">
@@ -364,11 +495,11 @@ ${url}
 
                 <div className="text-right flex flex-col items-end gap-2">
 
-  <p className="text-xs text-gray-500">
-    Status: {job.status}
-  </p>
+                  <p className="text-xs text-gray-500">
+                    Status: {job.status}
+                  </p>
 
-  {/* <button
+                  {/* <button
     onClick={() => shareJob(job.id)}
     className="text-gray-600 hover:text-gray-800 text-lg"
     title="Share Job"
@@ -382,47 +513,58 @@ ${url}
 
 
 
-<button
-  onClick={() => shareJob(job)}
-  className="text-gray-600 hover:text-gray-800 text-lg"
-  title="Share Job"
->
-  <FaShareAlt />
-</button>
-</div>
+                  <button
+                    onClick={() => shareJob(job)}
+                    className="text-gray-600 hover:text-gray-800 text-lg"
+                    title="Share Job"
+                  >
+                    <FaShareAlt />
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-4 mt-4 text-sm">
-         <button
-  onClick={() =>
-    navigate(`/employer/applicants/${job.id}`)
-  }
-  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-lg font-semibold"
-  title="View Applicants"
->
-  <span className="text-xl">👥</span>
-  <span className="text-lg">{applicantCounts[job.id] || 0}</span>
-</button>
+                <button
+                  onClick={() =>
+                    navigate(`/employer/applicants/${job.id}`)
+                  }
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-lg font-semibold"
+                  title="View Applicants"
+                >
+                  <span className="text-xl">👥</span>
+                  <span className="text-lg">{applicantCounts[job.id] || 0}</span>
+                </button>
 
-
-                {job.status !== "closed" && (
-                 <button
-  onClick={() =>
-    navigate(`/employer/post-job?jobId=${job.id}`)
-  }
-  className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
->
-  Edit Job
-</button>
-                )}
 
                 {job.status !== "closed" && (
                   <button
-  onClick={() => closeJob(job.id)}
-  className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
->
-  Close Job
-</button>
+                    onClick={() =>
+                      navigate(`/employer/post-job?jobId=${job.id}`)
+                    }
+                    className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                  >
+                    Edit Job
+                  </button>
+                )}
+
+                {job.status === "closed" ? (
+
+                  <button
+                    onClick={() => openJob(job.id)}
+                    className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+                  >
+                    Open Job
+                  </button>
+
+                ) : (
+
+                  <button
+                    onClick={() => closeJob(job.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                  >
+                    Close Job
+                  </button>
+
                 )}
               </div>
             </div>

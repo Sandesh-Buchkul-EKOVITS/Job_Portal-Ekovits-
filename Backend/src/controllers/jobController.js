@@ -242,6 +242,27 @@ exports.closeJob = async (req, res) => {
 };
 
 
+
+exports.openJob = async (req, res) => {
+  try {
+
+    const jobId = req.params.id;
+    const employerId = req.user.id;
+
+    await pool.query(
+      "UPDATE jobs SET status='approved' WHERE id=$1 AND employer_id=$2",
+      [jobId, employerId]
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+
+    res.status(500).json({ success:false });
+
+  }
+};
+
 // ✅ Get All Active Jobs (Public)
 exports.getAllJobs = async (req, res) => {
   try {

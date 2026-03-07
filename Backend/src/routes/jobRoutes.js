@@ -45,13 +45,14 @@ router.put("/:id", verifyToken, jobController.updateJob);
 
 /* CLOSE JOB */
 router.put("/close/:id", verifyToken, jobController.closeJob);
-
+// router.put("/open/:id", jobController.openJob);
+router.put("/open/:id", verifyToken, jobController.openJob);
 /* DELETE JOB */
 router.delete("/:id", verifyToken, jobController.deleteJob);
 
 /* GET ALL JOBS */
 router.get("/", jobController.getAllJobs);
-router.get("/:id", jobController.getJobById);
+// router.get("/:id", jobController.getJobById);
 
 router.get("/:jobId", verifyToken, jobController.getJobById);
 

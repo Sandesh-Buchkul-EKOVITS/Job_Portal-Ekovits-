@@ -208,7 +208,7 @@ exports.login = async (req, res) => {
 
   try {
    const result = await pool.query(
- "SELECT id, email, role, name, password, plan FROM users WHERE email=$1",
+ "SELECT id, email, role, name, password, plan, blocked FROM users WHERE email=$1",
  [email]
 );
 
@@ -218,6 +218,14 @@ console.log("DB USER:", result.rows);
     }
 
 const user = result.rows[0];
+
+/* 🚫 BLOCKED USER CHECK */
+if (user.blocked) {
+  return res.status(403).json({
+    success: false,
+    message: "Your account has been blocked by admin"
+  });
+}
 
 console.log("PASSWORD ENTERED:", password);
 console.log("HASH FROM DB:", user.password);
