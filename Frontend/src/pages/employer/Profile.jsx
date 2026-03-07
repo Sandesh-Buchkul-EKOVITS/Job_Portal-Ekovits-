@@ -293,10 +293,10 @@ import {
 export default function EmployerProfile() {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-    const emptyProfile = {
-    companyName: "",
+  const emptyProfile = {
+    companyName: currentUser?.companyName || "",
     email: currentUser.email || "",
-    phone: "",
+    phone: currentUser?.phone || "",
     website: "",
     location: "",
     description: "",
@@ -313,26 +313,26 @@ export default function EmployerProfile() {
   };
 
 
-  
+
   const [profile, setProfile] = useState(emptyProfile);
   const [draft, setDraft] = useState(emptyProfile);
   const [editMode, setEditMode] = useState(false);
 
-  
-const employerId = currentUser.id;
-useEffect(() => {
-  if (!employerId) return;
 
-  const fetchProfile = async () => {
-    const saved = await getEmployerProfile();
-    if (saved) {
-      setProfile({ ...emptyProfile, ...saved });
-      setDraft({ ...emptyProfile, ...saved });
-    }
-  };
+  const employerId = currentUser.id;
+  useEffect(() => {
+    if (!employerId) return;
 
-  fetchProfile();
-}, []);
+    const fetchProfile = async () => {
+      const saved = await getEmployerProfile();
+      if (saved) {
+        setProfile({ ...emptyProfile, ...saved });
+        setDraft({ ...emptyProfile, ...saved });
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
 
 
@@ -354,31 +354,31 @@ useEffect(() => {
   }
 
 
-  
 
 
 
-//   useEffect(() => {
-//     useEffect(() => {
-//   const fetchProfile = async () => {
-//     const data = await getEmployerProfile();
-//     if (data) {
-//       setProfile(data);
-//       setDraft(data);
-//     }
-//   };
-//   fetchProfile();
-// }, []);
 
-//     if (saved) {
-//       setProfile({ ...emptyProfile, ...saved });
-//       setDraft({ ...emptyProfile, ...saved });
-//     } else {
-//       setProfile(emptyProfile);
-//       setDraft(emptyProfile);
-//     }
-    
-//   }, [employerId]);
+  //   useEffect(() => {
+  //     useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     const data = await getEmployerProfile();
+  //     if (data) {
+  //       setProfile(data);
+  //       setDraft(data);
+  //     }
+  //   };
+  //   fetchProfile();
+  // }, []);
+
+  //     if (saved) {
+  //       setProfile({ ...emptyProfile, ...saved });
+  //       setDraft({ ...emptyProfile, ...saved });
+  //     } else {
+  //       setProfile(emptyProfile);
+  //       setDraft(emptyProfile);
+  //     }
+
+  //   }, [employerId]);
 
   // const saveProfile = () => {
   //   setProfile(draft);
@@ -386,10 +386,10 @@ useEffect(() => {
   //   setEditMode(false);
   // };
   const saveProfile = async () => {
-  await saveEmployerProfile(draft);
-  setProfile(draft);
-  setEditMode(false);
-};
+    await saveEmployerProfile(draft);
+    setProfile(draft);
+    setEditMode(false);
+  };
 
 
 
@@ -401,56 +401,56 @@ useEffect(() => {
 
 
 
-// const requestVerification = () => {
-//   const requests =
-//     JSON.parse(localStorage.getItem("verification_requests")) || [];
+  // const requestVerification = () => {
+  //   const requests =
+  //     JSON.parse(localStorage.getItem("verification_requests")) || [];
 
-//   const alreadyRequested = requests.find(
-//     (r) => String(r.employerId) === String(employerId)
-//   );
+  //   const alreadyRequested = requests.find(
+  //     (r) => String(r.employerId) === String(employerId)
+  //   );
 
-//   if (alreadyRequested) {
-//     alert("Verification already requested.");
-//     return;
-//   }
+  //   if (alreadyRequested) {
+  //     alert("Verification already requested.");
+  //     return;
+  //   }
 
-//   requests.push({
-//     employerId,
-//     status: "pending",
-//     requestedAt: new Date().toISOString(),
-//   });
+  //   requests.push({
+  //     employerId,
+  //     status: "pending",
+  //     requestedAt: new Date().toISOString(),
+  //   });
 
-//   localStorage.setItem(
-//     "verification_requests",
-//     JSON.stringify(requests)
-//   );
+  //   localStorage.setItem(
+  //     "verification_requests",
+  //     JSON.stringify(requests)
+  //   );
 
-//   alert("Verification request sent to admin");
-// };
+  //   alert("Verification request sent to admin");
+  // };
 
 
-// const requestVerification = () => {
-//   const users = JSON.parse(localStorage.getItem("users")) || [];
+  // const requestVerification = () => {
+  //   const users = JSON.parse(localStorage.getItem("users")) || [];
 
-//   const existingIndex = users.findIndex(
-//     (u) => String(u.id) === String(currentUser.id)
-//   );
+  //   const existingIndex = users.findIndex(
+  //     (u) => String(u.id) === String(currentUser.id)
+  //   );
 
-//   const employerData = {
-//     ...currentUser,
-//     role: "employer",
-//     verificationRequested: true,
-//     blocked: false,
-//   };
+  //   const employerData = {
+  //     ...currentUser,
+  //     role: "employer",
+  //     verificationRequested: true,
+  //     blocked: false,
+  //   };
 
-//   if (existingIndex !== -1) {
-//     users[existingIndex] = employerData;
-//   } else {
-//     users.push(employerData);
-//   }
+  //   if (existingIndex !== -1) {
+  //     users[existingIndex] = employerData;
+  //   } else {
+  //     users.push(employerData);
+  //   }
 
-//   localStorage.setItem("users", JSON.stringify(users));
-// };
+  //   localStorage.setItem("users", JSON.stringify(users));
+  // };
 
 
 
@@ -578,20 +578,12 @@ useEffect(() => {
             <div className="flex-1">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div>
-          {!editMode ? (
-  <h1 className="text-2xl font-semibold">
-    {profile.companyName || "Company Name"}
-  </h1>
-) : (
-  <input
-    className="text-2xl font-semibold border-none outline-none bg-transparent"
-    value={draft.companyName}
-    placeholder="Company Name"
-    onChange={(e) =>
-      setDraft({ ...draft, companyName: e.target.value })
-    }
-  />
-)}
+
+
+
+                  <h1 className="text-2xl font-semibold">
+  {profile.companyName || "Company Name"}
+</h1>
 
 
 
@@ -619,7 +611,7 @@ useEffect(() => {
                   <div className="flex gap-3">
                     <button
                       onClick={saveProfile}
-                    className="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-medium transition shadow"
+                      className="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-medium transition shadow"
 
                     >
                       Save Changes
@@ -648,26 +640,25 @@ useEffect(() => {
                     </p>
                   </div>
 
-                 <button
-  type="button"
-  onClick={async () => {
-    const success = await requestVerification();
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const success = await requestVerification();
 
-    if (success) {
-      alert("Verification request sent to admin");
-    } else {
-      alert("Verification request failed");
-    }
-  }}
-  className={`px-4 py-2 rounded-xl font-medium transition ${
-    profile.verified
-      ? "bg-green-100 text-green-700 cursor-not-allowed"
-      : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
-  }`}
-  disabled={profile.verified}
->
-  {profile.verified ? "Verified" : "Request Verification"}
-</button>
+                      if (success) {
+                        alert("Verification request sent to admin");
+                      } else {
+                        alert("Verification request failed");
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-xl font-medium transition ${profile.verified
+                        ? "bg-green-100 text-green-700 cursor-not-allowed"
+                        : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                      }`}
+                    disabled={profile.verified}
+                  >
+                    {profile.verified ? "Verified" : "Request Verification"}
+                  </button>
 
                 </div>
               </div>
@@ -680,21 +671,19 @@ useEffect(() => {
 
           {/* Company Details */}
           <Section title="Company Details" subtitle="Basic company information for job postings">
-            <Field
-              label="Company Name"
-              placeholder="e.g. TechNova Pvt Ltd"
-              value={draft.companyName}
-              editMode={editMode}
-              onChange={(v) => setDraft({ ...draft, companyName: v })}
-            />
+           <Field
+  label="Company Name"
+  placeholder="e.g. TechNova Pvt Ltd"
+  value={draft.companyName}
+  editMode={false}
+/>
 
-            <Field
-              label="Phone"
-              placeholder="e.g. +91 98765 43210"
-              value={draft.phone}
-              editMode={editMode}
-              onChange={(v) => setDraft({ ...draft, phone: v })}
-            />
+           <Field
+  label="Phone"
+  placeholder="e.g. +91 98765 43210"
+  value={draft.phone}
+  editMode={false}
+/>
 
             <Field
               label="Website"
@@ -816,7 +805,7 @@ useEffect(() => {
               <div className="flex gap-3">
                 <button
                   onClick={saveProfile}
-                 className="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-medium transition"
+                  className="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-medium transition"
 
                 >
                   Save Changes
@@ -875,16 +864,14 @@ function Field({ label, value, editMode, onChange, placeholder }) {
 function StatusPill({ verified }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full font-medium ${
-        verified
+      className={`inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full font-medium ${verified
           ? "bg-green-100 text-green-700"
           : "bg-yellow-100 text-yellow-800"
-      }`}
+        }`}
     >
       <span
-        className={`w-2 h-2 rounded-full ${
-          verified ? "bg-green-600" : "bg-yellow-600"
-        }`}
+        className={`w-2 h-2 rounded-full ${verified ? "bg-green-600" : "bg-yellow-600"
+          }`}
       />
       {verified ? "Verified Company" : "Verification Pending"}
     </span>

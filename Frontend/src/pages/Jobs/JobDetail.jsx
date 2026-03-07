@@ -408,12 +408,17 @@ export default function JobDetail() {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/jobs/${id}`);
-       const data = await res.json();
-console.log("JOB API RESPONSE:", data);
-
-setJob(data.job || data);
-
+        const token = localStorage.getItem("token");
+         const res = await fetch(`http://localhost:5000/api/jobs/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+        const data = await res.json();
+        console.log("JOB API RESPONSE:", data);
+ if (data.success) {
+      setJob(data.job);
+    }
       } catch (err) {
         console.log(err);
       }
@@ -425,81 +430,81 @@ setJob(data.job || data);
   /* ================= FETCH APPLICATION INFO ================= */
 
   useEffect(() => {
-   
-fetchApplicationInfo();
+
+    fetchApplicationInfo();
   }, [id, user]);
 
-  
-    const fetchApplicationInfo = async () => {
-       if (!user || user.role !== "candidate") return;
-      try {
-        const token = localStorage.getItem("token");
 
-        const res = await fetch(
-          `http://localhost:5000/api/applications/job/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  const fetchApplicationInfo = async () => {
+    if (!user || user.role !== "candidate") return;
+    try {
+      const token = localStorage.getItem("token");
 
-        const data = await res.json();
-
-        if (data.success) {
-          setTotalApplications(data.total);
-
-          // if (data.total >= 50) {
-          //   setIsLimitReached(true);
-          // }
-
-          if (data.alreadyApplied) {
-            setAlreadyApplied(true);
-            setApplicationStatus(data.status);
-          }
+      const res = await fetch(
+        `http://localhost:5000/api/applications/job/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (err) {
-        console.log(err);
-      }
-    };
+      );
 
-    
+      const data = await res.json();
+
+      if (data.success) {
+        setTotalApplications(data.total);
+
+        // if (data.total >= 50) {
+        //   setIsLimitReached(true);
+        // }
+
+        if (data.alreadyApplied) {
+          setAlreadyApplied(true);
+          setApplicationStatus(data.status);
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+
 
   /* ================= APPLY JOB ================= */
 
   const applyJob = async () => {
-  if (alreadyApplied) return;
+    if (alreadyApplied) return;
 
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    const res = await fetch(
-      `http://localhost:5000/api/applications/apply/${id}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch(
+        `http://localhost:5000/api/applications/apply/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || "Application failed");
+
+        // 🔥 IMPORTANT: Refetch application info
+        fetchApplicationInfo();
+        return;
       }
-    );
 
-    const data = await res.json();
-
-    if (!data.success) {
-      alert(data.message || "Application failed");
-      
-      // 🔥 IMPORTANT: Refetch application info
+      // 🔥 Refetch latest info after apply
       fetchApplicationInfo();
-      return;
+
+    } catch (err) {
+      console.log(err);
     }
-
-    // 🔥 Refetch latest info after apply
-    fetchApplicationInfo();
-
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
 
 
   const statusColor = (status) => {
@@ -555,25 +560,24 @@ fetchApplicationInfo();
               </div>
             ) : (
               <>
-              {totalApplications >= 50 && !alreadyApplied && (
-  <p className="text-sm text-red-600 mb-3">
-    Application limit reached 
-  </p>
-)}
+                {totalApplications >= 50 && !alreadyApplied && (
+                  <p className="text-sm text-red-600 mb-3">
+                    Application limit reached
+                  </p>
+                )}
 
-             <button
-  onClick={applyJob}
-  disabled={alreadyApplied || totalApplications >= 50}
-  className={`px-6 py-2 rounded text-white font-medium ${
-    alreadyApplied || totalApplications >= 50
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-gradient-to-r from-[#7A004B] to-[#CC0047]"
-  }`}
->
-  {totalApplications >= 50
-    ? "Applications Closed"
-    : "Apply Now"}
-</button>
+                <button
+                  onClick={applyJob}
+                  disabled={alreadyApplied || totalApplications >= 50}
+                  className={`px-6 py-2 rounded text-white font-medium ${alreadyApplied || totalApplications >= 50
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-[#7A004B] to-[#CC0047]"
+                    }`}
+                >
+                  {totalApplications >= 50
+                    ? "Applications Closed"
+                    : "Apply Now"}
+                </button>
 
               </>
             )}

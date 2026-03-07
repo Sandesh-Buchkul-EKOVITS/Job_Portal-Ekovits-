@@ -111,11 +111,15 @@ const handleRegister = async (e) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      role: "employer",
-      email: form.email,
-      password: form.password,
-      name: form.recruiterName
-    })
+  role: "employer",
+  email: form.email,
+  password: form.password,
+  name: form.recruiterName,
+  companyName: form.companyName,
+  phone: form.phone,
+  industry: form.industry,
+  companySize: form.companySize
+})
   });
 
   const data = await res.json();

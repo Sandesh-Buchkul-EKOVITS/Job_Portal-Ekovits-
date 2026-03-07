@@ -878,6 +878,9 @@ import { useParams } from "react-router-dom";
 
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+// import { FaCheck, FaTimes } from "react-icons/fa";
+import { FaCheck, FaTimes, FaQuestion } from "react-icons/fa";
+// import { FaCheck, FaTimes } from "react-icons/fa";
 import DashboardLayout from "../../app/layouts/DashboardLayout";
 import { useCurrentUser } from "../../app/auth/useCurrentUser";
 
@@ -1009,7 +1012,9 @@ const { jobId } = useParams();
           >
             <option value="all">All Status</option>
             <option value="applied">Applied</option>
+            {/* <option value="maybe">Maybe</option> */}
             <option value="shortlisted">Shortlisted</option>
+            <option value="maybe">Maybe</option>
             <option value="rejected">Rejected</option>
           </select>
 
@@ -1032,58 +1037,204 @@ const { jobId } = useParams();
             No applicants yet.
           </div>
         ) : (
+          // filteredApplications.map((app) => (
+          //   <div
+          //     key={app.id}
+          //     className="bg-white p-5 rounded shadow flex justify-between items-center"
+          //   >
+          //     <div>
+          //       <p className="font-semibold">
+          //         {app.name}
+          //       </p>
+
+          //       <p className="text-sm text-gray-600 flex items-center gap-3">
+          //         <span>{app.title}</span>
+
+          //         {app.status !== "shortlisted" && (
+          //           <button
+          //             onClick={() =>
+          //               updateStatus(app.id, "shortlisted")
+          //             }
+          //             className="text-green-600 hover:underline text-xs"
+          //           >
+          //             Shortlist
+          //           </button>
+          //         )}
+
+          //         {app.status !== "rejected" && (
+          //           <button
+          //             onClick={() =>
+          //               updateStatus(app.id, "rejected")
+          //             }
+          //             className="text-red-600 hover:underline text-xs"
+          //           >
+          //             Reject
+          //           </button>
+          //         )}
+          //       </p>
+
+          //       <p className="text-xs text-gray-500 mt-1">
+          //         Applied on{" "}
+          //         {new Date(app.applied_at).toLocaleDateString()}
+          //       </p>
+          //     </div>
+
+          //     <button
+          //       onClick={() =>
+          //         navigate(`/employer/candidate/${app.user_id}`)
+          //       }
+          //       className="text-blue-600 hover:underline text-sm"
+          //     >
+          //       View Profile
+          //     </button>
+          //   </div>
+          // ))
           filteredApplications.map((app) => (
-            <div
-              key={app.id}
-              className="bg-white p-5 rounded shadow flex justify-between items-center"
-            >
-              <div>
-                <p className="font-semibold">
-                  {app.name}
-                </p>
+  <div
+    key={app.id}
+    className="bg-white p-5 rounded shadow flex justify-between"
+  >
+    <div>
+      <p className="font-semibold">
+        {app.name}
+      </p>
 
-                <p className="text-sm text-gray-600 flex items-center gap-3">
-                  <span>{app.title}</span>
+      <p className="text-sm text-gray-600">
+        {app.title}
+      </p>
 
-                  {app.status !== "shortlisted" && (
-                    <button
-                      onClick={() =>
-                        updateStatus(app.id, "shortlisted")
-                      }
-                      className="text-green-600 hover:underline text-xs"
-                    >
-                      Shortlist
-                    </button>
-                  )}
+      <p className="text-xs text-gray-500 mt-1">
+        Applied on{" "}
+        {new Date(app.applied_at).toLocaleDateString()}
+      </p>
+    </div>
 
-                  {app.status !== "rejected" && (
-                    <button
-                      onClick={() =>
-                        updateStatus(app.id, "rejected")
-                      }
-                      className="text-red-600 hover:underline text-xs"
-                    >
-                      Reject
-                    </button>
-                  )}
-                </p>
+    <div className="flex flex-col items-end gap-2">
 
-                <p className="text-xs text-gray-500 mt-1">
-                  Applied on{" "}
-                  {new Date(app.applied_at).toLocaleDateString()}
-                </p>
-              </div>
+      <button
+        onClick={() =>
+          navigate(`/employer/candidate/${app.user_id}`)
+        }
+        className="text-blue-600 hover:underline text-sm"
+      >
+        View Profile
+      </button>
 
-              <button
-                onClick={() =>
-                  navigate(`/employer/candidate/${app.user_id}`)
-                }
-                className="text-blue-600 hover:underline text-sm"
-              >
-                View Profile
-              </button>
-            </div>
-          ))
+      {/* <div className="flex gap-3">
+
+       {app.status !== "shortlisted" && (
+  <button
+    onClick={() =>
+      updateStatus(app.id, "shortlisted")
+    }
+    className="text-green-600 hover:text-green-700 text-sm"
+    title="Shortlist"
+  >
+    <FaCheck />
+  </button>
+)}
+
+      {app.status !== "rejected" && (
+  <button
+    onClick={() =>
+      updateStatus(app.id, "rejected")
+    }
+    className="text-red-600 hover:text-red-700 text-sm"
+    title="Reject"
+  >
+    <FaTimes />
+  </button>
+)}
+
+      </div> */}
+
+
+{/* 
+<div className="flex border rounded overflow-hidden">
+
+  <button
+    onClick={() =>
+      updateStatus(app.id, "shortlisted")
+    }
+    title="Shortlist"
+    className={`px-3 py-1 transition 
+      ${app.status === "shortlisted"
+        ? "bg-green-600 text-white"
+        : "text-green-600 hover:bg-green-600 hover:text-white"}
+    `}
+  >
+    <FaCheck />
+  </button>
+
+  <button
+    onClick={() =>
+      updateStatus(app.id, "rejected")
+    }
+    title="Reject"
+    className={`px-3 py-1 border-l transition
+      ${app.status === "rejected"
+        ? "bg-red-600 text-white"
+        : "text-red-600 hover:bg-red-600 hover:text-white"}
+    `}
+  >
+    <FaTimes />
+  </button>
+
+</div>
+ */}
+
+<div className="flex border rounded-lg overflow-hidden">
+
+  {/* SHORTLIST */}
+  <button
+    onClick={() => updateStatus(app.id, "shortlisted")}
+    title="Shortlist"
+    className={`px-3 py-1 transition 
+      ${app.status === "shortlisted"
+        ? "bg-green-600 text-white"
+        : "text-green-600 hover:bg-green-600 hover:text-white"}
+    `}
+  >
+    <FaCheck />
+  </button>
+
+  {/* MAYBE */}
+  <button
+    onClick={() => updateStatus(app.id, "maybe")}
+    title="Maybe"
+    className={`px-3 py-1 border-l transition 
+      ${app.status === "maybe"
+        ? "bg-gray-400 text-white"
+        : "text-gray-600 hover:bg-gray-400 hover:text-white"}
+    `}
+  >
+    <FaQuestion />
+  </button>
+
+  {/* REJECT */}
+  <button
+    onClick={() => updateStatus(app.id, "rejected")}
+    title="Reject"
+    className={`px-3 py-1 border-l transition 
+      ${app.status === "rejected"
+        ? "bg-red-600 text-white"
+        : "text-red-600 hover:bg-red-600 hover:text-white"}
+    `}
+  >
+    <FaTimes />
+  </button>
+
+</div>
+
+
+
+
+
+
+
+    </div>
+  </div>
+))
         )}
 
         <button

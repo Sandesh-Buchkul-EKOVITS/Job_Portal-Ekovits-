@@ -119,7 +119,8 @@ const sendOtpEmail = require("../utils/SendEmail");
 /* ================= REGISTER ================= */
 
 exports.register = async (req, res) => {
-  const { role, email, password, name } = req.body;
+  // const { role, email, password, name } = req.body;
+  const { role, email, password, name, companyName, phone, industry, companySize } = req.body;
 
   try {
     const existing = await pool.query(
@@ -142,9 +143,17 @@ const newUser = await pool.query(
 
 if (role === "employer") {
   await pool.query(
-    "INSERT INTO employer_profile (employer_id) VALUES ($1)",
-    [newUser.rows[0].id]
-  );
+  `INSERT INTO employer_profile 
+  (employer_id, company_name, phone, industry, company_size)
+  VALUES ($1,$2,$3,$4,$5)`,
+  [
+    newUser.rows[0].id,
+    companyName,
+    phone,
+    industry,
+    companySize
+  ]
+);
 }
 
    
@@ -204,7 +213,7 @@ if (role === "employer") {
 
 exports.login = async (req, res) => {
   console.log("LOGIN BODY:", req.body);
-  const { email, password } = req.body;
+ const { email, password, role } = req.body;
 
   try {
    const result = await pool.query(
@@ -219,11 +228,28 @@ console.log("DB USER:", result.rows);
 
 const user = result.rows[0];
 
+/* 🔐 ADMIN LOGIN PROTECTION */
+
+if (user.role === "admin" && role !== "admin") {
+  return res.status(403).json({
+    success: false,
+    message: "User not found"
+  });
+}
+
+if (user.role !== "admin" && role === "admin") {
+  return res.status(403).json({
+    success: false,
+    message: "Invalid admin credentials"
+  });
+}
+
+
 /* 🚫 BLOCKED USER CHECK */
 if (user.blocked) {
   return res.status(403).json({
     success: false,
-    message: "Your account has been blocked by admin"
+    message: "Your account has been blocked"
   });
 }
 

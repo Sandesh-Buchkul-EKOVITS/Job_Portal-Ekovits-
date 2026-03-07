@@ -53,7 +53,6 @@ router.delete("/:id", verifyToken, jobController.deleteJob);
 /* GET ALL JOBS */
 router.get("/", jobController.getAllJobs);
 // router.get("/:id", jobController.getJobById);
-
-router.get("/:jobId", verifyToken, jobController.getJobById);
+router.get("/:id", verifyToken, jobController.getJobById);
 
 module.exports = router;
