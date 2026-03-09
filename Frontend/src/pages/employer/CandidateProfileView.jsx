@@ -471,12 +471,12 @@ setProfile(data.profile);
 
         {/* BACK BUTTON – BOTTOM */}
         <div className="pt-6 text-center">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-sm text-blue-600 underline"
-          >
-            ← Back to Applicants
-          </button>
+        <button
+  onClick={() => navigate(-1)}
+  className="bg-gradient-to-r from-[#7A004B] to-[#CC0047] text-white px-5 py-2 rounded-md text-sm font-medium shadow hover:opacity-90 transition"
+>
+  ← Back to Applicants
+</button>
         </div>
 
       </div>

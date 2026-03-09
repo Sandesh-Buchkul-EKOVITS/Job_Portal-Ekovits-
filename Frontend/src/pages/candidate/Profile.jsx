@@ -126,8 +126,6 @@ useEffect(() => {
   //   setEditMode(false);
   // };
 
-
-
 const saveProfile = async () => {
   const success = await saveCandidateProfile(draft);
 
@@ -139,10 +137,6 @@ const saveProfile = async () => {
     alert("Failed to save profile");
   }
 };
-
-
-
-
 
 
 
@@ -360,6 +354,11 @@ const saveProfile = async () => {
 
      function ProfessionalSummarySection({ summary, onChange, editMode }) {
      const [text, setText] = useState(summary || "");
+//      useEffect(() => {
+//   if (editMode) {
+//     onChange(text);
+//   }
+// }, [text]);
      const [showForm, setShowForm] = useState(false);
 
       useEffect(() => {
@@ -469,6 +468,13 @@ function WorkExperienceSection({ experience, onChange, editMode }) {
   };
 
   const [form, setForm] = useState(empty);
+//   useEffect(() => {
+//   if (editMode && form.role) {
+//     if (editIndex === null) {
+//       onChange([...experience, form]);
+//     }
+//   }
+// }, [form]);
   const [editIndex, setEditIndex] = useState(null);
   const [showForm, setShowForm] = useState(false); // 🔥 NEW: toggle form visibility
 

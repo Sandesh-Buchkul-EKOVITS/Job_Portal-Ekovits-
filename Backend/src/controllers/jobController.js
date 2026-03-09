@@ -158,23 +158,24 @@ exports.updateJob = async (req, res) => {
 
     await pool.query(
       `UPDATE jobs SET
-        title=$1,
-        experience=$2,
-        industry=$3,
-        work_mode=$4,
-        location=$5,
-        salary_from=$6,
-        salary_to=$7,
-        salary_type=$8,
-        description=$9,
-        qualification=$10,
-        gender=$11,
-        skills=$12,
-        benefits=$13,
-        languages=$14,
-        questions=$15,
-        about_company=$16
-       WHERE id=$17 AND employer_id=$18`,
+  title=$1,
+  experience=$2,
+  industry=$3,
+  work_mode=$4,
+  location=$5,
+  salary_from=$6,
+  salary_to=$7,
+  salary_type=$8,
+  description=$9,
+  qualification=$10,
+  gender=$11,
+  skills=$12,
+  benefits=$13,
+  languages=$14,
+  questions=$15,
+  about_company=$16,
+  status='pending'   -- 🔥 NEW LINE
+WHERE id=$17 AND employer_id=$18`,
       [
         title,
         experience,
@@ -248,11 +249,10 @@ exports.openJob = async (req, res) => {
 
     const jobId = req.params.id;
     const employerId = req.user.id;
-
-    await pool.query(
-      "UPDATE jobs SET status='approved' WHERE id=$1 AND employer_id=$2",
-      [jobId, employerId]
-    );
+await pool.query(
+  "UPDATE jobs SET status='pending' WHERE id=$1 AND employer_id=$2",
+  [jobId, employerId]
+);
 
     res.json({ success: true });
 
