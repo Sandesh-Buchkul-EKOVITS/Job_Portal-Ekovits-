@@ -65,7 +65,11 @@ export default function Footer() {
 
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
           {/* <img src={logo} alt="Job Portal" className="h-10" /> */}
-          <img src={logo} alt="Job Portal" className="h-12 w-auto -ml-2" />
+          {/* <img src={logo} alt="Job Portal" className="h-12 w-auto -ml-2" /> */}
+           <img src={logo} alt="Job Portal" 
+           className="h-20 md:h-15" />
+
+           className="h-20 md:h-15
           <p className="text-sm text-gray-400 mt-2">
             Connecting talent with opportunity.
           </p>

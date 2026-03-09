@@ -48,6 +48,7 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const employerProfileRoutes = require("./routes/employerProfileRoutes");
 const candidateProfileRoutes = require("./routes/candidateProfileRoutes");
 const savedJobsRoutes = require("./routes/savedJobsRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 
 const adminRoutes = require("./routes/adminRoutes");
@@ -75,6 +76,7 @@ app.use("/api/auth", authRoutes);   // ✅ ADDED
 // app.use("/api/jobs", jobRoutes);
 app.use("/api/employer-profile", employerProfileRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/contact", contactRoutes);
 app.use("/api/candidate-profile", candidateProfileRoutes);
 
 app.get("/", (req, res) => {

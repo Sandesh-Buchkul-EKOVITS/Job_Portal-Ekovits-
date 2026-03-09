@@ -545,9 +545,9 @@ export default function PostJob() {
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [employerProfile, setEmployerProfile] = useState(null);
-const [loading, setLoading] = useState(true);
-const token = localStorage.getItem("token");
-const [activeJobsCount, setActiveJobsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+  const [activeJobsCount, setActiveJobsCount] = useState(0);
 
 
 
@@ -565,30 +565,30 @@ const [activeJobsCount, setActiveJobsCount] = useState(0);
 
 
 
-const [jobToEdit, setJobToEdit] = useState(null);
+  const [jobToEdit, setJobToEdit] = useState(null);
 
 
   /* ================= FORM STATE ================= */
 
- const [form, setForm] = useState({
-  title: jobToEdit?.title || "",
-  experience: jobToEdit?.experience || "",
-  industry: jobToEdit?.industry || "",
-  qualification: jobToEdit?.qualification || "",
-  gender: jobToEdit?.gender || "Any",
-  workMode: jobToEdit?.workMode || "",
-  location: jobToEdit?.location || "",
-  salaryType: jobToEdit?.salaryType || "Monthly",
-  salaryFrom: jobToEdit?.salaryFrom || "",
-  salaryTo: jobToEdit?.salaryTo || "",
-  skills: jobToEdit?.skills || [],
-  benefits: jobToEdit?.benefits || [],
-  languages: jobToEdit?.languages || [],
-  aboutCompany: jobToEdit?.aboutCompany || "",
-  description: jobToEdit?.description || "",
-});
+  const [form, setForm] = useState({
+    title: jobToEdit?.title || "",
+    experience: jobToEdit?.experience || "",
+    industry: jobToEdit?.industry || "",
+    qualification: jobToEdit?.qualification || "",
+    gender: jobToEdit?.gender || "Any",
+    workMode: jobToEdit?.workMode || "",
+    location: jobToEdit?.location || "",
+    salaryType: jobToEdit?.salaryType || "Monthly",
+    salaryFrom: jobToEdit?.salaryFrom || "",
+    salaryTo: jobToEdit?.salaryTo || "",
+    skills: jobToEdit?.skills || [],
+    benefits: jobToEdit?.benefits || [],
+    languages: jobToEdit?.languages || [],
+    aboutCompany: jobToEdit?.aboutCompany || "",
+    description: jobToEdit?.description || "",
+  });
 
-const [skillInput, setSkillInput] = useState("");
+  const [skillInput, setSkillInput] = useState("");
   const [customQuestion, setCustomQuestion] = useState("");
   // const [charCount, setCharCount] = useState(0);
   const [error, setError] = useState("");
@@ -596,110 +596,110 @@ const [skillInput, setSkillInput] = useState("");
 
 
 
-//  const employerProfile = getEmployerProfile(currentUser.id);
-// const companyName = employerProfile?.companyName || "";
-useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      const data = await getEmployerProfile();
-      setEmployerProfile(data);
-    } catch (err) {
-      console.error("Profile fetch failed", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProfile();
-}, []);
-
-
-useEffect(() => {
-  const fetchJobById = async () => {
-    if (!editJobId) return;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(
-        `http://localhost:5000/api/jobs/${editJobId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        setJobToEdit(data.job);
-
-        setForm({
-          title: data.job.title || "",
-          experience: data.job.experience || "",
-          industry: data.job.industry || "",
-          qualification: data.job.qualification || "",
-          gender: data.job.gender || "Any",
-          workMode: data.job.work_mode || "",
-          location: data.job.location || "",
-          salaryType: data.job.salary_type || "Monthly",
-          salaryFrom: data.job.salary_from || "",
-          salaryTo: data.job.salary_to || "",
-          skills: data.job.skills || [],
-          benefits: data.job.benefits || [],
-          languages: data.job.languages || [],
-          aboutCompany: data.job.about_company || "",
-          description: data.job.description || "",
-        });
+  //  const employerProfile = getEmployerProfile(currentUser.id);
+  // const companyName = employerProfile?.companyName || "";
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getEmployerProfile();
+        setEmployerProfile(data);
+      } catch (err) {
+        console.error("Profile fetch failed", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    };
 
-  fetchJobById();
-}, [editJobId]);
+    fetchProfile();
+  }, []);
 
 
-useEffect(() => {
-  const fetchMyJobs = async () => {
-    try {
-      const token = localStorage.getItem("token");
+  useEffect(() => {
+    const fetchJobById = async () => {
+      if (!editJobId) return;
 
-      const res = await fetch(
-        "http://localhost:5000/api/jobs/my-jobs",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      try {
+        const token = localStorage.getItem("token");
 
-      const data = await res.json();
-
-      if (data.success) {
-        const activeJobs = data.jobs.filter(
-          (job) => job.status !== "closed"
+        const res = await fetch(
+          `http://localhost:5000/api/jobs/${editJobId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
-        setActiveJobsCount(activeJobs.length);
+        const data = await res.json();
+
+        if (data.success) {
+          setJobToEdit(data.job);
+
+          setForm({
+            title: data.job.title || "",
+            experience: data.job.experience || "",
+            industry: data.job.industry || "",
+            qualification: data.job.qualification || "",
+            gender: data.job.gender || "Any",
+            workMode: data.job.work_mode || "",
+            location: data.job.location || "",
+            salaryType: data.job.salary_type || "Monthly",
+            salaryFrom: data.job.salary_from || "",
+            salaryTo: data.job.salary_to || "",
+            skills: data.job.skills || [],
+            benefits: data.job.benefits || [],
+            languages: data.job.languages || [],
+            aboutCompany: data.job.about_company || "",
+            description: data.job.description || "",
+          });
+        }
+      } catch (err) {
+        console.log(err);
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    };
 
-  fetchMyJobs();
-}, []);
+    fetchJobById();
+  }, [editJobId]);
 
 
-const companyName = employerProfile?.companyName || "";
+  useEffect(() => {
+    const fetchMyJobs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(
+          "http://localhost:5000/api/jobs/my-jobs",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          const activeJobs = data.jobs.filter(
+            (job) => job.status !== "closed"
+          );
+
+          setActiveJobsCount(activeJobs.length);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchMyJobs();
+  }, []);
+
+
+  const companyName = employerProfile?.companyName || "";
 
 
 
 
-    
+
   // ✅ Current Plan & Limits
   const currentPlan = currentUser.plan || "FREE";
   const maxJobsAllowed = PLAN_LIMITS[currentPlan] || 1;
@@ -709,7 +709,7 @@ const companyName = employerProfile?.companyName || "";
 
   const isLimitReached = !jobToEdit && activeJobsCount >= maxJobsAllowed;
 
-// const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
 
 
@@ -717,18 +717,18 @@ const companyName = employerProfile?.companyName || "";
 
   /* ================= DESCRIPTION INIT ================= */
 
- useEffect(() => {
-  if (editorRef.current && jobToEdit) {
-    editorRef.current.innerHTML = jobToEdit.description || "";
-  }
-}, [jobToEdit]);
+  useEffect(() => {
+    if (editorRef.current && jobToEdit) {
+      editorRef.current.innerHTML = jobToEdit.description || "";
+    }
+  }, [jobToEdit]);
 
 
 
   /* ================= SESSION CHECK ================= */
 
 
-if (!token) {
+  if (!token) {
 
 
     return (
@@ -744,14 +744,14 @@ if (!token) {
 
   // const employerProfile = getEmployerProfile(currentUser.id);
   if (loading) {
-  return (
-    <DashboardLayout title="Post Job">
-      <div className="bg-white p-6 rounded-xl shadow">
-        Loading...
-      </div>
-    </DashboardLayout>
-  );
-}
+    return (
+      <DashboardLayout title="Post Job">
+        <div className="bg-white p-6 rounded-xl shadow">
+          Loading...
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (!employerProfile?.verified) {
     return (
@@ -769,86 +769,86 @@ if (!token) {
       </DashboardLayout>
     );
   }
-//////// submit////////////
-  
+  //////// submit////////////
 
-const submit = async () => {
-  setError("");
 
-  // ✅ Plan Limit Check (Frontend side validation)
-  if (!jobToEdit && activeJobsCount >= maxJobsAllowed) {
-    setError(
-      `Your ${currentPlan} plan allows only ${maxJobsAllowed} job post(s). Please upgrade to post more jobs.`
-    );
-    return;
-  }
+  const submit = async () => {
+    setError("");
 
-  // ✅ Required field validation
-  if (
-    !form.title ||
-    !form.experience ||
-    !form.industry ||
-    !form.workMode ||
-    !form.location ||
-    !form.salaryFrom ||
-    !form.salaryTo ||
-    !editorRef.current?.innerText?.trim()
-  ) {
-    setError("Please fill all required fields.");
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      setError("Authentication failed. Please login again.");
+    // ✅ Plan Limit Check (Frontend side validation)
+    if (!jobToEdit && activeJobsCount >= maxJobsAllowed) {
+      setError(
+        `Your ${currentPlan} plan allows only ${maxJobsAllowed} job post(s). Please upgrade to post more jobs.`
+      );
       return;
     }
 
-    const payload = {
-      title: form.title,
-      experience: form.experience,
-      industry: form.industry,
-      workMode: form.workMode,
-      location: form.location,
-      salaryFrom: form.salaryFrom,
-      salaryTo: form.salaryTo,
-      description: editorRef.current.innerText, // 🔥 DB compatible
-    };
-
-  const url = editJobId
-  ? `http://localhost:5000/api/jobs/${editJobId}`
-  : "http://localhost:5000/api/jobs";
-
-const method = editJobId ? "PUT" : "POST";
-
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json();
-
-    if (!data.success) {
-      setError(data.message || "Something went wrong");
+    // ✅ Required field validation
+    if (
+      !form.title ||
+      !form.experience ||
+      !form.industry ||
+      !form.workMode ||
+      !form.location ||
+      !form.salaryFrom ||
+      !form.salaryTo ||
+      !editorRef.current?.innerText?.trim()
+    ) {
+      setError("Please fill all required fields.");
       return;
     }
 
-    navigate("/employer/my-jobs");
+    try {
+      const token = localStorage.getItem("token");
 
-  } catch (err) {
-    console.error(err);
-    setError("Server error");
-  }
-};
+      if (!token) {
+        setError("Authentication failed. Please login again.");
+        return;
+      }
+
+      const payload = {
+        title: form.title,
+        experience: form.experience,
+        industry: form.industry,
+        workMode: form.workMode,
+        location: form.location,
+        salaryFrom: form.salaryFrom,
+        salaryTo: form.salaryTo,
+        description: editorRef.current.innerText, // 🔥 DB compatible
+      };
+
+      const url = editJobId
+        ? `http://localhost:5000/api/jobs/${editJobId}`
+        : "http://localhost:5000/api/jobs";
+
+      const method = editJobId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        setError(data.message || "Something went wrong");
+        return;
+      }
+
+      navigate("/employer/my-jobs");
+
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    }
+  };
 
 
- 
+
 
 
 
@@ -887,7 +887,7 @@ const method = editJobId ? "PUT" : "POST";
   //   description: jobToEdit?.description || "",
   // });
 
-  
+
 
   // useEffect(() => {
   //   if (editorRef.current && form.description) {
@@ -1114,12 +1114,12 @@ const method = editJobId ? "PUT" : "POST";
             </div>
 
             {!jobToEdit && (
-             <button
-  onClick={() => navigate("/employer/subscription")}
-  className="bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition w-full sm:w-auto text-center"
->
-  Upgrade Plan
-</button>
+              <button
+                onClick={() => navigate("/employer/subscription")}
+                className="bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition w-full sm:w-auto text-center"
+              >
+                Upgrade Plan
+              </button>
             )}
           </div>
         </div>
@@ -1299,40 +1299,99 @@ const method = editJobId ? "PUT" : "POST";
 
               <button
                 type="button"
+                // onMouseDown={(e) => {
+                //   e.preventDefault();
+
+                //   const editor = editorRef.current;
+                //   if (!editor) return;
+
+                //   editor.focus();
+
+                //   const selection = window.getSelection();
+                //   if (!selection || selection.rangeCount === 0) return;
+
+                //   const range = selection.getRangeAt(0);
+
+                //   if (isBulletOn) {
+                //     // 🔴 BULLET OFF
+                //     setIsBulletOn(false);
+                //     return;
+                //   }
+
+                //   // 🟢 BULLET ON
+                //   setIsBulletOn(true);
+
+                //   // 👉 IMMEDIATELY insert bullet at cursor
+                //   const bullet = document.createTextNode("• ");
+                //   range.insertNode(bullet);
+
+                //   // cursor bullet ke baad
+                //   range.setStartAfter(bullet);
+                //   range.collapse(true);
+                //   selection.removeAllRanges();
+                //   selection.addRange(range);
+
+                //   updateDescription();
+                // }}
+
                 onMouseDown={(e) => {
-                  e.preventDefault();
+  e.preventDefault();
 
-                  const editor = editorRef.current;
-                  if (!editor) return;
+  const editor = editorRef.current;
+  if (!editor) return;
 
-                  editor.focus();
+  editor.focus();
 
-                  const selection = window.getSelection();
-                  if (!selection || selection.rangeCount === 0) return;
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
 
-                  const range = selection.getRangeAt(0);
+  const range = selection.getRangeAt(0);
 
-                  if (isBulletOn) {
-                    // 🔴 BULLET OFF
-                    setIsBulletOn(false);
-                    return;
-                  }
+  const selectedText = selection.toString();
 
-                  // 🟢 BULLET ON
-                  setIsBulletOn(true);
+  // 🔴 Toggle OFF
+  if (isBulletOn) {
+    setIsBulletOn(false);
+    return;
+  }
 
-                  // 👉 IMMEDIATELY insert bullet at cursor
-                  const bullet = document.createTextNode("• ");
-                  range.insertNode(bullet);
+  setIsBulletOn(true);
 
-                  // cursor bullet ke baad
-                  range.setStartAfter(bullet);
-                  range.collapse(true);
-                  selection.removeAllRanges();
-                  selection.addRange(range);
+  // ✅ If multiple lines selected
+ if (selectedText.includes("\n")) {
+  const lines = selectedText.split("\n");
 
-                  updateDescription();
-                }}
+  range.deleteContents();
+
+  const fragment = document.createDocumentFragment();
+
+  lines.forEach((line, index) => {
+    const text = document.createTextNode("• " + line);
+    fragment.appendChild(text);
+
+    if (index !== lines.length - 1) {
+      fragment.appendChild(document.createElement("br"));
+    }
+  });
+
+  range.insertNode(fragment);
+
+  selection.removeAllRanges();
+}
+   else {
+    // cursor case (old behaviour)
+    const bullet = document.createTextNode("• ");
+    range.insertNode(bullet);
+
+    range.setStartAfter(bullet);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  updateDescription();
+}}
                 className={`border px-3 py-1 rounded-lg text-sm flex items-center transition
     ${isBulletOn
                     ? "bg-indigo-600 text-white border-indigo-700"
@@ -1360,7 +1419,7 @@ const method = editJobId ? "PUT" : "POST";
                   <circle cx="4" cy="18" r="1" />
                 </svg>
               </button>
- 
+
 
 
 
@@ -1376,13 +1435,13 @@ const method = editJobId ? "PUT" : "POST";
             <div
               ref={editorRef}
               contentEditable
-               dir="ltr"
+              dir="ltr"
               tabIndex={0}                // 🔥 VERY IMPORTANT
               role="textbox"              // 🔥 accessibility + selection fix
               className="border p-3 min-h-[160px] rounded-xl outline-none focus:ring-2 focus:ring-indigo-400"
               //  style={{ direction: "ltr", textAlign: "left" }}
               // onInput={handleInput}
-onInput={updateDescription}
+              onInput={updateDescription}
 
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}

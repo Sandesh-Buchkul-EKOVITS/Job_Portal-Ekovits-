@@ -105,6 +105,7 @@ const getDashboardStats = async (req, res) => {
     const pending = await pool.query("SELECT COUNT(*) FROM jobs WHERE status='pending'");
     const approved = await pool.query("SELECT COUNT(*) FROM jobs WHERE status='approved'");
     const rejected = await pool.query("SELECT COUNT(*) FROM jobs WHERE status='rejected'");
+    const queries = await pool.query("SELECT COUNT(*) FROM contact_queries");
 
     res.json({
       success: true,
@@ -115,7 +116,8 @@ const getDashboardStats = async (req, res) => {
         jobs: Number(jobs.rows[0].count),
         pendingJobs: Number(pending.rows[0].count),
         approvedJobs: Number(approved.rows[0].count),
-        rejectedJobs: Number(rejected.rows[0].count)
+        rejectedJobs: Number(rejected.rows[0].count),
+        userQueries: Number(queries.rows[0].count)
       }
     });
 
@@ -595,6 +597,59 @@ const deleteJob = async (req, res) => {
     });
   }
 };
+/* ================= GET USER QUERIES ================= */
+
+const getUserQueries = async (req, res) => {
+  try {
+
+    const result = await pool.query(
+      "SELECT * FROM contact_queries ORDER BY created_at DESC"
+    );
+
+    res.json({
+      success: true,
+      queries: result.rows
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      success:false
+    });
+
+  }
+};
+
+
+/* ================= GET SINGLE QUERY ================= */
+
+const getSingleQuery = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const result = await pool.query(
+      "SELECT * FROM contact_queries WHERE id=$1",
+      [id]
+    );
+
+    res.json({
+      success:true,
+      query: result.rows[0]
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      success:false
+    });
+
+  }
+};
 
 module.exports = {
   getDashboardStats,
@@ -610,6 +665,8 @@ updateJobStatus,
    toggleUserBlock,
   resetUserPassword,
   deleteJob,
-  deleteUser
+  deleteUser,
+  getUserQueries,
+getSingleQuery
 
 };

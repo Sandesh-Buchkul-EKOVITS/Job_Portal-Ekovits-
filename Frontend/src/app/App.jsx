@@ -13,10 +13,13 @@ import ResetPassword from "../pages/auth/ResetPassword";
 
 /* ---------- Public ---------- */
 import Landing from "../pages/Landing";
+{/* <Route path="/contact" element={<Contact />} /> */}
 import Login from "../pages/auth/Login";
 import CandidateRegister from "../pages/auth/Register";
 import EmployerRegister from "../pages/auth/EmployerRegister";
 import Pricing from "../pages/Pricing";   // ✅ ADDED
+import Contact from "../pages/contactPage";
+import UserQueries from "../pages/admin/UserQueries";
 
 /* ---------- Candidate ---------- */
 import Jobs from "../pages/jobs";
@@ -35,7 +38,7 @@ import MyJobs from "../pages/employer/MyJobs";
 import EmployerViewApplicants from "../pages/employer/ViewApplicants";
 import EmployerCandidateProfileView from "../pages/employer/CandidateProfileView";
 // import VerifyEmployerOtp from "../pages/auth/VerifyEmployerOtp";
-
+// import Contact from "./pages/Contact";
 
 /* ---------- Admin ---------- */
 // import AdminLogin from "../pages/admin/AdminLogin";
@@ -48,6 +51,7 @@ import AdminJobs from "../pages/admin/Jobs";
 import JobModeration from "../pages/admin/JobModeration";
 import AdminEmployers from "../pages/admin/Employers";
 import AdminEmployerProfile from "../pages/admin/EmployerProfile";
+import QueryDetail from "../pages/admin/QueryDetail";
 // import RequireAdmin from "./app/guards/RequireAdmin";
 
 /* ---------- Guards ---------- */
@@ -82,6 +86,7 @@ export default function App() {
 
       {/* ---------- PUBLIC ---------- */}
       <Route path="/pricing" element={<Pricing />} />   {/* ✅ ADDED */}
+      <Route path="/contact" element={<Contact />} />
 
       {/* ---------- AUTH ---------- */}
 
@@ -95,6 +100,7 @@ export default function App() {
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 <Route path="/reset-password" element={<ResetPassword />} />
+
 
       {/* ---------- CANDIDATE ONLY JOBS ---------- */}
       <Route
@@ -292,6 +298,22 @@ export default function App() {
           </RequireRole>
         }
       />
+      <Route
+  path="/admin/query/:id"
+  element={
+    <RequireRole allowedRoles={["admin"]}>
+      <QueryDetail />
+    </RequireRole>
+  }
+/>
+      <Route
+path="/admin/queries"
+element={
+<RequireRole allowedRoles={["admin"]}>
+<UserQueries/>
+</RequireRole>
+}
+/>
 
       {/* ---------- FALLBACK ---------- */}
       <Route

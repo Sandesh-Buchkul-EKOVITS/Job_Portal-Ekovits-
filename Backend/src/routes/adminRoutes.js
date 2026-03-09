@@ -134,7 +134,19 @@ router.get(
   controller.getPlanUpgradeRequests
 );
 
+router.get(
+  "/queries",
+  verifyToken,
+  requireRole("admin"),
+  controller.getUserQueries
+);
 
+router.get(
+  "/queries/:id",
+  verifyToken,
+  requireRole("admin"),
+  controller.getSingleQuery
+);
 
 
 module.exports = router;

@@ -25,14 +25,15 @@ export default function AdminDashboard() {
       const data = await res.json();
 
       if (data.success) {
-     setStats({
+   setStats({
   users: data.stats.totalUsers,
   candidates: data.stats.candidates,
   employers: data.stats.employers,
   jobs: data.stats.jobs,
   pendingJobs: data.stats.pendingJobs,
   approvedJobs: data.stats.approvedJobs,
-  rejectedJobs: data.stats.rejectedJobs
+  rejectedJobs: data.stats.rejectedJobs,
+  userQueries: data.stats.userQueries
 });
 
       }
@@ -155,7 +156,7 @@ useEffect(() => {
         />
       </div>
 
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+     <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card
           title="Pending Jobs"
           value={stats.pendingJobs}
@@ -179,6 +180,13 @@ useEffect(() => {
             navigate("/admin/jobs?status=rejected")
           }
         />
+     <Card
+  title="User Queries"
+  value={stats.userQueries}
+  onClick={() =>
+    navigate("/admin/queries")
+  }
+/>
       </div>
     </DashboardLayout>
   );
