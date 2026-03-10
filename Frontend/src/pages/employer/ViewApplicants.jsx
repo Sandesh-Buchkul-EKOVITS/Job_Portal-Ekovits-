@@ -1199,7 +1199,7 @@ const { jobId } = useParams();
   </button>
 
   {/* MAYBE */}
-  {/* <button
+  <button
     onClick={() => updateStatus(app.id, "maybe")}
     title="Maybe"
     className={`px-3 py-1 border-l transition 
@@ -1209,7 +1209,7 @@ const { jobId } = useParams();
     `}
   >
     <FaQuestion />
-  </button> */}
+  </button>
 
   {/* REJECT */}
   <button

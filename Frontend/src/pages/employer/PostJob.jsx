@@ -814,6 +814,9 @@ export default function PostJob() {
         location: form.location,
         salaryFrom: form.salaryFrom,
         salaryTo: form.salaryTo,
+          skills: form.skills,        // ✅ ADD THIS
+  benefits: form.benefits,    // optional but recommended
+  languages: form.languages,
         description: editorRef.current.innerText, // 🔥 DB compatible
       };
 
