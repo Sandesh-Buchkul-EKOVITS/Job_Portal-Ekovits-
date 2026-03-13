@@ -1,0 +1,1614 @@
+// import { useState, useEffect, useRef } from "react";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import DashboardLayout from "../../app/layouts/DashboardLayout";
+// import { getEmployerProfile } from "../../app/services/employerProfileService";
+
+// /* ================= CONSTANTS ================= */
+
+// const EXPERIENCE_RANGES = [
+//   "0 – 1 Year",
+//   "1 – 3 Years",
+//   "3 – 5 Years",
+//   "5 – 8 Years",
+//   "8+ Years",
+// ];
+
+// const WORK_MODES = ["Remote", "Hybrid", "On Site"];
+
+// const INDUSTRIES = [
+//   "IT Software Development",
+//   "IT Services",
+//   "Healthcare",
+//   "Real Estate",
+//   "Construction",
+//   "Manufacturing",
+//   "BPO / KPO",
+//   "E-commerce",
+//   "Retail",
+//   "Logistics",
+//   "Education / EdTech",
+//   "FinTech",
+//   "Banking",
+//   "Insurance",
+//   "Hospitality",
+//   "Travel & Tourism",
+//   "Media & Advertising",
+//   "Telecom",
+//   "Automobile",
+//   "Pharmaceutical",
+// ];
+
+// const QUALIFICATIONS = ["Diploma", "Graduate", "Post Graduate"];
+// const GENDERS = ["Any", "Male", "Female"];
+
+// const BENEFITS = [
+//   "Work From Home",
+//   "PF",
+//   "Health Insurance",
+//   "Cab Facility",
+//   "Paid Leave",
+// ];
+
+// const LANGUAGES = [
+//   "English",
+//   "Hindi",
+//   "Marathi",
+//   "Gujarati",
+//   "Tamil",
+//   "Telugu",
+//   "Malayalam",
+// ];
+
+// const QUESTION_TEMPLATES = [
+//   "What is your notice period?",
+//   "What is your current CTC?",
+//   "What is your expected salary?",
+//   "Are you willing to relocate?",
+// ];
+
+// const MAX_CHARS = 250;
+
+// /* ================= COMPONENT ================= */
+
+// export default function PostJob() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   const editorRef = useRef(null);
+
+//   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+//   const users = JSON.parse(localStorage.getItem("users")) || [];
+
+//   const employer = users.find(
+//     (u) => u.id === currentUser?.id && u.role === "employer"
+//   );
+//   const companyName = employer?.companyName || "";
+
+//   const query = new URLSearchParams(location.search);
+//   const editJobId = query.get("jobId");
+
+//   if (!currentUser || currentUser.role !== "employer" || !companyName) {
+//     return (
+//       <DashboardLayout title="Post Job">
+//         <div className="bg-white p-6 rounded shadow">
+//           Invalid session. Please login again.
+//         </div>
+//       </DashboardLayout>
+//     );
+//   }
+
+//   const employerProfile = getEmployerProfile(currentUser.id);
+//   if (!employerProfile?.verified) {
+//     return (
+//       <DashboardLayout title="Post Job">
+//         <div className="bg-yellow-50 border border-yellow-300 p-6 rounded">
+//           Company verification required to post jobs.
+//         </div>
+//       </DashboardLayout>
+//     );
+//   }
+
+//   const jobs = JSON.parse(localStorage.getItem("jobs")) || [];
+//   const jobToEdit = editJobId
+//     ? jobs.find(
+//         (j) => j.id === editJobId && j.employerId === currentUser.id
+//       )
+//     : null;
+
+//   /* ================= STATE ================= */
+
+//   const [form, setForm] = useState({
+//     title: jobToEdit?.title || "",
+//     experience: jobToEdit?.experience || "",
+//     industry: jobToEdit?.industry || "",
+//     qualification: jobToEdit?.qualification || "",
+//     gender: jobToEdit?.gender || "Any",
+
+//     // ✅ NEW REQUIRED FIELDS
+//     workMode: jobToEdit?.workMode || "",
+//     location: jobToEdit?.location || "",
+
+//     salaryType: jobToEdit?.salaryType || "Monthly",
+//     salaryFrom: jobToEdit?.salaryFrom || "",
+//     salaryTo: jobToEdit?.salaryTo || "",
+
+//     skills: jobToEdit?.skills || [],
+//     benefits: jobToEdit?.benefits || [],
+//     languages: jobToEdit?.languages || [],
+
+//     questions: jobToEdit?.questions || [],
+
+//     aboutCompany: jobToEdit?.aboutCompany || "",
+//     description: jobToEdit?.description || "",
+//   });
+
+//   const [skillInput, setSkillInput] = useState("");
+//   const [customQuestion, setCustomQuestion] = useState("");
+//   const [charCount, setCharCount] = useState(0);
+//   const [error, setError] = useState("");
+
+//   useEffect(() => {
+//     if (editorRef.current && form.description) {
+//       editorRef.current.innerHTML = form.description;
+//       setCharCount(editorRef.current.innerText.length);
+//     }
+//   }, []);
+
+//   /* ================= EDITOR ================= */
+
+//   const updateDescription = () => {
+//     const text = editorRef.current.innerText || "";
+//     setCharCount(text.length);
+//     setForm({ ...form, description: editorRef.current.innerHTML });
+//   };
+
+//   const exec = (cmd) => {
+//     editorRef.current.focus();
+//     document.execCommand(cmd, false, null);
+//     updateDescription();
+//   };
+
+//   const handleKeyDown = (e) => {
+//     if (
+//       charCount >= MAX_CHARS &&
+//       !["Backspace", "Delete", "ArrowLeft", "ArrowRight"].includes(e.key)
+//     ) {
+//       e.preventDefault();
+//     }
+//   };
+
+//   /* ================= SUBMIT ================= */
+
+//   const submit = () => {
+//     if (
+//       !form.title ||
+//       !form.experience ||
+//       !form.industry ||
+//       !form.workMode ||
+//       !form.location ||
+//       !form.salaryFrom ||
+//       !form.salaryTo ||
+//       !editorRef.current.innerText.trim()
+//     ) {
+//       setError("Please fill all required fields.");
+//       return;
+//     }
+
+//     const payload = {
+//       ...form,
+//       companyName,
+//       employerId: currentUser.id,
+//       status: "pending",
+//       createdAt: new Date().toISOString(),
+//     };
+
+//     const updatedJobs = jobToEdit
+//       ? jobs.map((j) => (j.id === jobToEdit.id ? payload : j))
+//       : [...jobs, { ...payload, id: Date.now().toString() }];
+
+//     localStorage.setItem("jobs", JSON.stringify(updatedJobs));
+//     navigate("/employer/my-jobs");
+//   };
+
+//   /* ================= UI ================= */
+
+//   return (
+//     <DashboardLayout title={jobToEdit ? "Edit Job" : "Post Job"}>
+//       <div className="max-w-5xl bg-white p-6 rounded shadow space-y-6">
+
+//         {error && <p className="text-red-600">{error}</p>}
+
+//         <Input label="Job Title *" value={form.title}
+//           onChange={(v) => setForm({ ...form, title: v })} />
+
+//         <ReadOnly label="Company Name" value={companyName} />
+
+//         <Select label="Work Experience *" value={form.experience}
+//           onChange={(v) => setForm({ ...form, experience: v })}
+//           options={EXPERIENCE_RANGES} />
+
+//         {/* ✅ WORK MODE */}
+//         <Select
+//           label="Work Mode *"
+//           value={form.workMode}
+//           onChange={(v) => setForm({ ...form, workMode: v })}
+//           options={WORK_MODES}
+//         />
+
+//         {/* ✅ LOCATION */}
+//         <Input
+//           label="Job Location *"
+//           value={form.location}
+//           onChange={(v) => setForm({ ...form, location: v })}
+//         />
+
+//         <Select label="Industry *" value={form.industry}
+//           onChange={(v) => setForm({ ...form, industry: v })}
+//           options={INDUSTRIES} />
+
+//         <Select label="Qualification" value={form.qualification}
+//           onChange={(v) => setForm({ ...form, qualification: v })}
+//           options={QUALIFICATIONS} />
+
+//         <Select label="Gender" value={form.gender}
+//           onChange={(v) => setForm({ ...form, gender: v })}
+//           options={GENDERS} />
+
+//         <div className="grid grid-cols-3 gap-4">
+//           <Select label="Salary Type *" value={form.salaryType}
+//             onChange={(v) => setForm({ ...form, salaryType: v })}
+//             options={["Monthly", "Yearly"]} />
+//           <Input label="From *" value={form.salaryFrom}
+//             onChange={(v) => setForm({ ...form, salaryFrom: v })} />
+//           <Input label="To *" value={form.salaryTo}
+//             onChange={(v) => setForm({ ...form, salaryTo: v })} />
+//         </div>
+
+//         <TagInput
+//           label="Candidate Preference / Skills"
+//           values={form.skills}
+//           input={skillInput}
+//           setInput={setSkillInput}
+//           onChange={(v) => setForm({ ...form, skills: v })}
+//         />
+
+//         <MultiSelect
+//           label="Benefits"
+//           options={BENEFITS}
+//           values={form.benefits}
+//           onChange={(v) => setForm({ ...form, benefits: v })}
+//         />
+
+//         <MultiSelect
+//           label="Languages Known"
+//           options={LANGUAGES}
+//           values={form.languages}
+//           onChange={(v) => setForm({ ...form, languages: v })}
+//         />
+
+//         <div>
+//           <p className="font-medium mb-2">Job Description *</p>
+//           <div
+//             ref={editorRef}
+//             contentEditable
+//             className="border p-3 min-h-[160px] outline-none"
+//             onInput={updateDescription}
+//             onKeyDown={handleKeyDown}
+//             suppressContentEditableWarning
+//           />
+//         </div>
+
+//         <Textarea
+//           label="About Company (Optional)"
+//           value={form.aboutCompany}
+//           onChange={(v) => setForm({ ...form, aboutCompany: v })}
+//         />
+
+//         <button
+//           onClick={submit}
+//           className="bg-green-600 text-white px-6 py-2 rounded"
+//         >
+//           {jobToEdit ? "Update Job" : "Publish Job"}
+//         </button>
+//       </div>
+//     </DashboardLayout>
+//   );
+// }
+
+// /* ================= SHARED ================= */
+
+// function Input({ label, value, onChange }) {
+//   return (
+//     <div>
+//       <p className="text-sm font-medium mb-1">{label}</p>
+//       <input
+//         className="border p-2 rounded w-full"
+//         value={value}
+//         onChange={(e) => onChange(e.target.value)}
+//       />
+//     </div>
+//   );
+// }
+
+// function Textarea({ label, value, onChange }) {
+//   return (
+//     <div>
+//       <p className="text-sm font-medium mb-1">{label}</p>
+//       <textarea
+//         className="border p-2 rounded w-full"
+//         rows={3}
+//         value={value}
+//         onChange={(e) => onChange(e.target.value)}
+//       />
+//     </div>
+//   );
+// }
+
+// function Select({ label, value, onChange, options }) {
+//   return (
+//     <div>
+//       <p className="text-sm font-medium mb-1">{label}</p>
+//       <select
+//         className="border p-2 rounded w-full"
+//         value={value}
+//         onChange={(e) => onChange(e.target.value)}
+//       >
+//         <option value="">Select</option>
+//         {options.map((o) => (
+//           <option key={o} value={o}>{o}</option>
+//         ))}
+//       </select>
+//     </div>
+//   );
+// }
+
+// function ReadOnly({ label, value }) {
+//   return (
+//     <div>
+//       <p className="text-sm font-medium mb-1">{label}</p>
+//       <div className="border p-2 rounded bg-gray-100">{value}</div>
+//     </div>
+//   );
+// }
+
+// function MultiSelect({ label, options, values, onChange }) {
+//   return (
+//     <div>
+//       <p className="font-medium mb-1">{label}</p>
+//       <div className="flex gap-2 flex-wrap">
+//         {options.map((o) => (
+//           <button
+//             key={o}
+//             onClick={() =>
+//               onChange(
+//                 values.includes(o)
+//                   ? values.filter((v) => v !== o)
+//                   : [...values, o]
+//               )
+//             }
+//             className={`px-3 py-1 text-xs border rounded ${
+//               values.includes(o) ? "bg-blue-600 text-white" : ""
+//             }`}
+//           >
+//             {o}
+//           </button>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
+
+// function TagInput({ label, values, input, setInput, onChange }) {
+//   return (
+//     <div>
+//       <p className="font-medium mb-1">{label}</p>
+//       <div className="flex gap-2 mb-2">
+//         <input
+//           className="border p-2 flex-1"
+//           value={input}
+//           onChange={(e) => setInput(e.target.value)}
+//         />
+//         <button
+//           onClick={() => {
+//             if (!input) return;
+//             onChange([...values, input]);
+//             setInput("");
+//           }}
+//           className="border px-4"
+//         >
+//           Add
+//         </button>
+//       </div>
+//       <div className="flex gap-2 flex-wrap">
+//         {values.map((v) => (
+//           <span key={v} className="bg-gray-200 px-2 py-1 text-xs rounded">
+//             {v}
+//           </span>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import DashboardLayout from "../../app/layouts/DashboardLayout";
+import { getEmployerProfile } from "../../app/services/employerProfileService";
+
+/* ================= CONSTANTS ================= */
+const JOB_TYPES = ["Fresher", "Experienced", "Internship"];
+const EXPERIENCE_RANGES = [
+  "0 – 1 Year",
+  "1 – 3 Years",
+  "3 – 5 Years",
+  "5 – 8 Years",
+  "8+ Years",
+];
+
+const WORK_MODES = ["Remote", "Hybrid", "On Site"];
+
+const INDUSTRIES = [
+  "IT Software Development",
+  "IT Services",
+  "Healthcare",
+  "Real Estate",
+  "Construction",
+  "Manufacturing",
+  "BPO / KPO",
+  "E-commerce",
+  "Retail",
+  "Logistics",
+  "Education / EdTech",
+  "FinTech",
+  "Banking",
+  "Insurance",
+  "Hospitality",
+  "Travel & Tourism",
+  "Media & Advertising",
+  "Telecom",
+  "Automobile",
+  "Pharmaceutical",
+];
+
+const QUALIFICATIONS = ["Diploma", "Graduate", "Post Graduate"];
+const GENDERS = ["Any", "Male", "Female"];
+
+const BENEFITS = [
+  "Work From Home",
+  "PF",
+  "Health Insurance",
+  "Cab Facility",
+  "Paid Leave",
+];
+
+const LANGUAGES = [
+  "English",
+  "Hindi",
+  "Marathi",
+  "Gujarati",
+  "Tamil",
+  "Telugu",
+  "Malayalam",
+];
+
+const QUESTION_TEMPLATES = [
+  "What is your notice period?",
+  "What is your current CTC?",
+  "What is your expected salary?",
+  "Are you willing to relocate?",
+];
+
+// const MAX_CHARS = 250;
+
+// ✅ Subscription Limits
+const PLAN_LIMITS = {
+  FREE: 1,
+  BASIC: 5,
+  ENTERPRISE: 10,
+};
+
+
+/* ================= COMPONENT ================= */
+
+export default function PostJob() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const editorRef = useRef(null);
+
+
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const [employerProfile, setEmployerProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+  const [activeJobsCount, setActiveJobsCount] = useState(0);
+
+
+
+
+
+  const query = new URLSearchParams(location.search);
+  const editJobId = query.get("jobId");
+  // const jobs = JSON.parse(localStorage.getItem("jobs")) || [];
+  // const jobToEdit = editJobId
+  //   ? jobs.find((j) => j.id === editJobId && j.employerId === currentUser?.id)
+  //   : null;
+
+
+
+
+
+
+  const [jobToEdit, setJobToEdit] = useState(null);
+
+
+  /* ================= FORM STATE ================= */
+
+  const [form, setForm] = useState({
+    title: jobToEdit?.title || "",
+    jobType: jobToEdit?.jobType || "",
+    experience: jobToEdit?.experience || "",
+    industry: jobToEdit?.industry || "",
+    qualification: jobToEdit?.qualification || "",
+    gender: jobToEdit?.gender || "Any",
+    workMode: jobToEdit?.workMode || "",
+    location: jobToEdit?.location || "",
+    salaryType: jobToEdit?.salaryType || "Monthly",
+    salaryFrom: jobToEdit?.salaryFrom || "",
+    salaryTo: jobToEdit?.salaryTo || "",
+    skills: jobToEdit?.skills || [],
+    benefits: jobToEdit?.benefits || [],
+    languages: jobToEdit?.languages || [],
+    aboutCompany: jobToEdit?.aboutCompany || "",
+    description: jobToEdit?.description || "",
+  });
+
+  const [skillInput, setSkillInput] = useState("");
+  const [customQuestion, setCustomQuestion] = useState("");
+  // const [charCount, setCharCount] = useState(0);
+  const [error, setError] = useState("");
+  const [isBulletOn, setIsBulletOn] = useState(false);
+
+
+
+  //  const employerProfile = getEmployerProfile(currentUser.id);
+  // const companyName = employerProfile?.companyName || "";
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getEmployerProfile();
+        setEmployerProfile(data);
+      } catch (err) {
+        console.error("Profile fetch failed", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+
+  useEffect(() => {
+    const fetchJobById = async () => {
+      if (!editJobId) return;
+
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(
+          `http://localhost:5000/api/jobs/${editJobId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          setJobToEdit(data.job);
+
+          setForm({
+            title: data.job.title || "",
+            experience: data.job.experience || "",
+            industry: data.job.industry || "",
+            qualification: data.job.qualification || "",
+            gender: data.job.gender || "Any",
+            workMode: data.job.work_mode || "",
+            location: data.job.location || "",
+            salaryType: data.job.salary_type || "Monthly",
+            salaryFrom: data.job.salary_from || "",
+            salaryTo: data.job.salary_to || "",
+            skills: data.job.skills || [],
+            benefits: data.job.benefits || [],
+            languages: data.job.languages || [],
+            aboutCompany: data.job.about_company || "",
+            description: data.job.description || "",
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchJobById();
+  }, [editJobId]);
+
+
+  useEffect(() => {
+    const fetchMyJobs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(
+          "http://localhost:5000/api/jobs/my-jobs",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          const activeJobs = data.jobs.filter(
+            (job) => job.status !== "closed"
+          );
+
+          setActiveJobsCount(activeJobs.length);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchMyJobs();
+  }, []);
+
+
+  const companyName = employerProfile?.companyName || "";
+
+
+
+
+
+  // ✅ Current Plan & Limits
+  const currentPlan = currentUser.plan || "FREE";
+  const maxJobsAllowed = PLAN_LIMITS[currentPlan] || 1;
+
+  // const employerJobs = jobs.filter((j) => j.employerId === currentUser?.id);
+  // const activeJobsCount = employerJobs.length;
+
+  const isLimitReached = !jobToEdit && activeJobsCount >= maxJobsAllowed;
+
+  // const token = localStorage.getItem("token");
+
+
+
+
+
+  /* ================= DESCRIPTION INIT ================= */
+
+  useEffect(() => {
+    if (editorRef.current && jobToEdit) {
+      editorRef.current.innerHTML = jobToEdit.description || "";
+    }
+  }, [jobToEdit]);
+
+
+
+  /* ================= SESSION CHECK ================= */
+
+
+  if (!token) {
+
+
+    return (
+      <DashboardLayout title="Post Job">
+
+
+        <div className="bg-white p-6 rounded-xl shadow">
+          Invalid session. Please login again.
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // const employerProfile = getEmployerProfile(currentUser.id);
+  if (loading) {
+    return (
+      <DashboardLayout title="Post Job">
+        <div className="bg-white p-6 rounded-xl shadow">
+          Loading...
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!employerProfile?.verified) {
+    return (
+      <DashboardLayout title="Post Job">
+
+
+        <div className="bg-yellow-50 border border-yellow-300 p-6 rounded-xl">
+          <p className="font-semibold text-yellow-800">
+            Company verification required to post jobs.
+          </p>
+          <p className="text-sm text-yellow-700 mt-1">
+            Please verify your company profile first.
+          </p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+  //////// submit////////////
+
+
+  const submit = async () => {
+    setError("");
+
+    // ✅ Plan Limit Check (Frontend side validation)
+    if (!jobToEdit && activeJobsCount >= maxJobsAllowed) {
+      setError(
+        `Your ${currentPlan} plan allows only ${maxJobsAllowed} job post(s). Please upgrade to post more jobs.`
+      );
+      return;
+    }
+
+    // ✅ Required field validation
+    if (
+      !form.title ||
+      !form.jobType || 
+      !form.experience ||
+      !form.industry ||
+      !form.workMode ||
+      !form.location ||
+      !form.salaryFrom ||
+      !form.salaryTo ||
+      !editorRef.current?.innerText?.trim()
+    ) {
+      setError("Please fill all required fields.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("Authentication failed. Please login again.");
+        return;
+      }
+
+      const payload = {
+        title: form.title,
+        jobType: form.jobType,
+        experience: form.experience,
+        industry: form.industry,
+        workMode: form.workMode,
+        location: form.location,
+        salaryFrom: form.salaryFrom,
+        salaryTo: form.salaryTo,
+        skills: form.skills,        // ✅ ADD THIS
+        benefits: form.benefits,    // optional but recommended
+        languages: form.languages,
+        description: editorRef.current.innerText, // 🔥 DB compatible
+      };
+
+      const url = editJobId
+        ? `http://localhost:5000/api/jobs/${editJobId}`
+        : "http://localhost:5000/api/jobs";
+
+      const method = editJobId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        setError(data.message || "Something went wrong");
+        return;
+      }
+
+      navigate("/employer/my-jobs");
+
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* ================= STATE ================= */
+
+  // const [form, setForm] = useState({
+  //   title: jobToEdit?.title || "",
+  //   experience: jobToEdit?.experience || "",
+  //   industry: jobToEdit?.industry || "",
+  //   qualification: jobToEdit?.qualification || "",
+  //   gender: jobToEdit?.gender || "Any",
+
+  //   // REQUIRED
+  //   workMode: jobToEdit?.workMode || "",
+  //   location: jobToEdit?.location || "",
+
+  //   salaryType: jobToEdit?.salaryType || "Monthly",
+  //   salaryFrom: jobToEdit?.salaryFrom || "",
+  //   salaryTo: jobToEdit?.salaryTo || "",
+
+  //   skills: jobToEdit?.skills || [],
+  //   benefits: jobToEdit?.benefits || [],
+  //   languages: jobToEdit?.languages || [],
+
+  //   questions: jobToEdit?.questions || [],
+
+  //   aboutCompany: jobToEdit?.aboutCompany || "",
+  //   description: jobToEdit?.description || "",
+  // });
+
+
+
+  // useEffect(() => {
+  //   if (editorRef.current && form.description) {
+  //     editorRef.current.innerHTML = form.description;
+  //     // setCharCount(editorRef.current.innerText.length);
+  //   }
+  // }, [currentUser]);
+
+  /* ================= EDITOR ================= */
+
+  // const updateDescription = () => {
+  //   const text = editorRef.current?.innerText || "";
+  //   setCharCount(text.length);
+  //   setForm({ ...form, description: editorRef.current?.innerHTML || "" });
+  // };
+
+
+
+
+  const updateDescription = () => {
+    setForm({ ...form, description: editorRef.current?.innerHTML || "" });
+  };
+
+
+  // const handleInput = () => {
+  //   if (!isBulletOn) {
+  //     updateDescription();
+  //     return;
+  //   }
+
+  //   const selection = window.getSelection();
+  //   if (!selection || selection.rangeCount === 0) return;
+
+  //   const range = selection.getRangeAt(0);
+  //   const container = range.startContainer;
+
+  //   // check: nayi line empty hai
+  //   if (
+  //     container.nodeType === 3 &&
+  //     container.textContent === ""
+  //   ) {
+  //     const bullet = document.createTextNode("• ");
+  //     range.insertNode(bullet);
+  //     range.setStartAfter(bullet);
+  //     range.collapse(true);
+  //     selection.removeAllRanges();
+  //     selection.addRange(range);
+  //   }
+
+  //   updateDescription();
+  // };
+
+
+
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+
+    const clipboardData = e.clipboardData || window.clipboardData;
+    const text = clipboardData.getData("text/plain");
+
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+
+    // 🔥 line breaks preserve karne ke liye <br> me convert
+    const lines = text.split(/\r?\n/);
+    const fragment = document.createDocumentFragment();
+
+    lines.forEach((line, index) => {
+      fragment.appendChild(document.createTextNode(line));
+      if (index !== lines.length - 1) {
+        fragment.appendChild(document.createElement("br"));
+      }
+    });
+
+    range.insertNode(fragment);
+
+    // 🔥 cursor ko end me set karo
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    updateDescription();
+  };
+
+
+
+
+
+  // const exec = (cmd) => {
+  //   if (!editorRef.current) return;
+  //   editorRef.current.focus();
+  //   document.execCommand(cmd, false, null);
+  //   updateDescription();
+  // };
+  const exec = (cmd) => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+
+    // Ensure selection exists
+    const sel = window.getSelection();
+    if (!sel.rangeCount) {
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      range.collapse(false);
+      sel.addRange(range);
+    }
+
+    document.execCommand(cmd, false, null);
+    updateDescription();
+  };
+
+
+
+
+
+
+
+
+  const handleKeyDown = (e) => {
+    // 🔹 ENTER → browser handle kare
+    if (e.key === "Enter") {
+      // bullet OFF → kuch nahi karna
+      if (!isBulletOn) return;
+
+      // bullet ON → next tick me bullet add hoga
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+
+        const range = selection.getRangeAt(0);
+
+        // agar cursor bilkul new line me hai
+        const bullet = document.createTextNode("• ");
+        range.insertNode(bullet);
+
+        range.setStartAfter(bullet);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        updateDescription();
+      }, 0);
+
+      return;
+    }
+
+    // Ctrl + A (Select all)
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+      e.preventDefault();
+
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return;
+    }
+
+    // Ctrl + C / V / X → browser handle kare
+    if (e.ctrlKey || e.metaKey) {
+      return;
+    }
+  };
+
+
+
+  /* ================= UI ================= */
+
+  return (
+    <DashboardLayout title={jobToEdit ? "Edit Job" : "Post Job"}>
+
+      {/* PAGE HEADING */}
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-slate-800 tracking-tight">
+          Post a New Job
+        </h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Create and publish a job opening to hire the right candidates
+        </p>
+      </div>
+
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Top Plan Banner */}
+        <div className="rounded-2xl p-5 text-white shadow bg-gradient-to-r from-[#7A004B] to-[#CC0047]">
+
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold">
+                Current Plan: {currentPlan}
+              </h2>
+              <p className="text-sm opacity-90 mt-1">
+                Jobs Posted: {activeJobsCount}/{maxJobsAllowed}
+              </p>
+            </div>
+
+            {!jobToEdit && (
+              <button
+                onClick={() => navigate("/employer/subscription")}
+                className="bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition w-full sm:w-auto text-center"
+              >
+                Upgrade Plan
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Limit Reached Banner */}
+        {isLimitReached && (
+          <div className="border border-red-200 bg-red-50 text-red-700 p-4 rounded-2xl shadow-sm">
+            <p className="font-semibold">
+              You have reached your job posting limit for {currentPlan}.
+            </p>
+            <p className="text-sm mt-1">
+              Upgrade your plan to post more jobs.
+            </p>
+            <div className="mt-3">
+              <button
+                onClick={() => navigate("/employer/subscription")}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition"
+              >
+                Upgrade Now
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="border border-red-200 bg-red-50 text-red-700 p-4 rounded-2xl">
+            <p className="font-semibold">⚠ {error}</p>
+          </div>
+        )}
+
+        {/* FORM CARD */}
+        <div className="bg-white p-6 rounded-2xl shadow space-y-6 border">
+          {/* Job Title */}
+          <Input
+            label="Job Title *"
+            value={form.title}
+            onChange={(v) => setForm({ ...form, title: v })}
+          />
+
+          {/* Company */}
+          <ReadOnly label="Company Name" value={companyName} />
+          {/* Job Posting For */}
+<div>
+  <p className="text-sm font-medium mb-2 text-gray-700">
+    Job Posting For *
+  </p>
+
+  <div className="flex gap-2 flex-wrap">
+    {JOB_TYPES.map((type) => (
+      <button
+        key={type}
+        type="button"
+        onClick={() => setForm({ ...form, jobType: type })}
+        className={`px-4 py-2 border rounded-full text-sm transition
+          ${
+            form.jobType === type
+              ? "bg-indigo-600 text-white border-indigo-600"
+              : "bg-white hover:bg-gray-50"
+          }
+        `}
+      >
+        {type}
+      </button>
+    ))}
+  </div>
+</div>
+
+          {/* Experience */}
+          <Select
+            label="Work Experience *"
+            value={form.experience}
+            onChange={(v) => setForm({ ...form, experience: v })}
+            options={EXPERIENCE_RANGES}
+          />
+
+          {/* Work Mode */}
+          <Select
+            label="Work Mode *"
+            value={form.workMode}
+            onChange={(v) => setForm({ ...form, workMode: v })}
+            options={WORK_MODES}
+          />
+
+          {/* Location */}
+          <Input
+            label="Job Location *"
+            value={form.location}
+            onChange={(v) => setForm({ ...form, location: v })}
+          />
+
+          {/* Industry */}
+          <Select
+            label="Industry *"
+            value={form.industry}
+            onChange={(v) => setForm({ ...form, industry: v })}
+            options={INDUSTRIES}
+          />
+
+          {/* Qualification */}
+          <Select
+            label="Qualification"
+            value={form.qualification}
+            onChange={(v) => setForm({ ...form, qualification: v })}
+            options={QUALIFICATIONS}
+          />
+
+          {/* Gender */}
+          <Select
+            label="Gender"
+            value={form.gender}
+            onChange={(v) => setForm({ ...form, gender: v })}
+            options={GENDERS}
+          />
+
+          {/* Salary */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <Select
+              label="Salary Type *"
+              value={form.salaryType}
+              onChange={(v) => setForm({ ...form, salaryType: v })}
+              options={["Monthly", "Yearly"]}
+            />
+            <Input
+              label="From *"
+              value={form.salaryFrom}
+              onChange={(v) => setForm({ ...form, salaryFrom: v })}
+            />
+            <Input
+              label="To *"
+              value={form.salaryTo}
+              onChange={(v) => setForm({ ...form, salaryTo: v })}
+            />
+          </div>
+
+          {/* Skills */}
+          <TagInput
+            label="Candidate Preference / Skills"
+            values={form.skills}
+            input={skillInput}
+            setInput={setSkillInput}
+            onChange={(v) => setForm({ ...form, skills: v })}
+          />
+
+          {/* Benefits */}
+          <MultiSelect
+            label="Benefits"
+            options={BENEFITS}
+            values={form.benefits}
+            onChange={(v) => setForm({ ...form, benefits: v })}
+          />
+
+          {/* Languages */}
+          <MultiSelect
+            label="Languages Known"
+            options={LANGUAGES}
+            values={form.languages}
+            onChange={(v) => setForm({ ...form, languages: v })}
+          />
+
+          {/* Job Description */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="font-medium">Job Description *</p>
+              {/* <p className="text-xs text-gray-500">
+                {charCount}/{MAX_CHARS}
+              </p> */}
+            </div>
+
+            {/* Editor toolbar (UI improve) */}
+            <div className="flex gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => exec("bold")}
+                className="border px-3 py-1 rounded-lg text-sm hover:bg-gray-50"
+              >
+                Bold
+              </button>
+              <button
+                type="button"
+                onClick={() => exec("italic")}
+                className="border px-3 py-1 rounded-lg text-sm hover:bg-gray-50"
+              >
+                Italic
+              </button>
+              <button
+                type="button"
+                onClick={() => exec("underline")}
+                className="border px-3 py-1 rounded-lg text-sm hover:bg-gray-50"
+              >
+                Underline
+              </button>
+              <button
+                type="button"
+                // onMouseDown={(e) => {
+                //   e.preventDefault();
+
+                //   const editor = editorRef.current;
+                //   if (!editor) return;
+
+                //   editor.focus();
+
+                //   const selection = window.getSelection();
+                //   if (!selection || selection.rangeCount === 0) return;
+
+                //   const range = selection.getRangeAt(0);
+
+                //   if (isBulletOn) {
+                //     // 🔴 BULLET OFF
+                //     setIsBulletOn(false);
+                //     return;
+                //   }
+
+                //   // 🟢 BULLET ON
+                //   setIsBulletOn(true);
+
+                //   // 👉 IMMEDIATELY insert bullet at cursor
+                //   const bullet = document.createTextNode("• ");
+                //   range.insertNode(bullet);
+
+                //   // cursor bullet ke baad
+                //   range.setStartAfter(bullet);
+                //   range.collapse(true);
+                //   selection.removeAllRanges();
+                //   selection.addRange(range);
+
+                //   updateDescription();
+                // }}
+
+                onMouseDown={(e) => {
+  e.preventDefault();
+
+  const editor = editorRef.current;
+  if (!editor) return;
+
+  editor.focus();
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+
+  const selectedText = selection.toString();
+
+  // 🔴 Toggle OFF
+  if (isBulletOn) {
+    setIsBulletOn(false);
+    return;
+  }
+
+  setIsBulletOn(true);
+
+  // ✅ If multiple lines selected
+ if (selectedText.includes("\n")) {
+  const lines = selectedText.split("\n");
+
+  range.deleteContents();
+
+  const fragment = document.createDocumentFragment();
+
+  lines.forEach((line, index) => {
+    const text = document.createTextNode("• " + line);
+    fragment.appendChild(text);
+
+    if (index !== lines.length - 1) {
+      fragment.appendChild(document.createElement("br"));
+    }
+  });
+
+  range.insertNode(fragment);
+
+  selection.removeAllRanges();
+}
+   else {
+    // cursor case (old behaviour)
+    const bullet = document.createTextNode("• ");
+    range.insertNode(bullet);
+
+    range.setStartAfter(bullet);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  updateDescription();
+}}
+                className={`border px-3 py-1 rounded-lg text-sm flex items-center transition
+    ${isBulletOn
+                    ? "bg-indigo-600 text-white border-indigo-700"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
+                  }
+  `}
+                title="Bullet List"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="9" y1="6" x2="21" y2="6" />
+                  <line x1="9" y1="12" x2="21" y2="12" />
+                  <line x1="9" y1="18" x2="21" y2="18" />
+                  <circle cx="4" cy="6" r="1" />
+                  <circle cx="4" cy="12" r="1" />
+                  <circle cx="4" cy="18" r="1" />
+                </svg>
+              </button>
+            </div>
+
+            <div
+              ref={editorRef}
+              contentEditable
+              dir="ltr"
+              tabIndex={0}                // 🔥 VERY IMPORTANT
+              role="textbox"              // 🔥 accessibility + selection fix
+              className="border p-3 min-h-[160px] rounded-xl outline-none focus:ring-2 focus:ring-indigo-400"
+              //  style={{ direction: "ltr", textAlign: "left" }}
+              // onInput={handleInput}
+              onInput={updateDescription}
+
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              suppressContentEditableWarning
+            />
+          </div>
+
+          {/* About Company */}
+          <Textarea
+            label="About Company (Optional)"
+            value={form.aboutCompany}
+            onChange={(v) => setForm({ ...form, aboutCompany: v })}
+          />
+
+          {/* Submit */}
+          <button
+            onClick={submit}
+            disabled={isLimitReached}
+            className={`w-full px-6 py-3 rounded-xl font-semibold transition
+              ${isLimitReached
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-gradient-to-r from-[#7A004B] to-[#CC0047] text-white hover:opacity-95"
+              }
+            `}
+          >
+            {jobToEdit ? "Update Job" : "Publish Job"}
+          </button>
+
+          {!jobToEdit && (
+            <p className="text-xs text-gray-500 text-center">
+              Your plan allows {maxJobsAllowed} job post(s). Upgrade anytime for
+              more.
+            </p>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+/* ================= SHARED ================= */
+
+function Input({ label, value, onChange }) {
+  return (
+    <div>
+      <p className="text-sm font-medium mb-1 text-gray-700">{label}</p>
+      <input
+        className="border p-2 rounded-xl w-full focus:ring-2 focus:ring-indigo-400 outline-none"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+function Textarea({ label, value, onChange }) {
+  return (
+    <div>
+      <p className="text-sm font-medium mb-1 text-gray-700">{label}</p>
+      <textarea
+        className="border p-2 rounded-xl w-full focus:ring-2 focus:ring-indigo-400 outline-none"
+        rows={3}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+function Select({ label, value, onChange, options }) {
+  return (
+    <div>
+      <p className="text-sm font-medium mb-1 text-gray-700">{label}</p>
+      <select
+        className="border p-2 rounded-xl w-full focus:ring-2 focus:ring-indigo-400 outline-none bg-white"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">Select</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function ReadOnly({ label, value }) {
+  return (
+    <div>
+      <p className="text-sm font-medium mb-1 text-gray-700">{label}</p>
+      <div className="border p-2 rounded-xl bg-gray-100 text-gray-800">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function MultiSelect({ label, options, values, onChange }) {
+  return (
+    <div>
+      <p className="font-medium mb-2 text-gray-700">{label}</p>
+      <div className="flex gap-2 flex-wrap">
+        {options.map((o) => {
+          const active = values.includes(o);
+          return (
+            <button
+              type="button"
+              key={o}
+              onClick={() =>
+                onChange(
+                  active ? values.filter((v) => v !== o) : [...values, o]
+                )
+              }
+              className={`px-3 py-1 text-xs border rounded-full transition
+                ${active
+                  ? "bg-indigo-600 text-white border-indigo-600"
+                  : "bg-white hover:bg-gray-50"
+                }
+              `}
+            >
+              {o}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TagInput({ label, values, input, setInput, onChange }) {
+  return (
+    <div>
+      <p className="font-medium mb-2 text-gray-700">{label}</p>
+
+      <div className="flex gap-2 mb-3">
+        <input
+          className="border p-2 flex-1 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a skill and click Add"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            const trimmed = input.trim();
+            if (!trimmed) return;
+
+            // avoid duplicates
+            if (values.includes(trimmed)) {
+              setInput("");
+              return;
+            }
+
+            onChange([...values, trimmed]);
+            setInput("");
+          }}
+          className="bg-gradient-to-r from-[#7A004B] to-[#CC0047] hover:opacity-95 text-white px-4 rounded-xl transition"
+
+        >
+          Add
+        </button>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        {values.map((v) => (
+          <span
+            key={v}
+            className="bg-gray-100 border px-3 py-1 text-xs rounded-full text-gray-700"
+          >
+            {v}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+

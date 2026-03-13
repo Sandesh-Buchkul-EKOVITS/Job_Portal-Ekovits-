@@ -1,0 +1,47 @@
+frontend/
+└── src/
+    ├── app/
+    │   ├── App.jsx
+    │   ├── guards/
+    │   │   └── RequireRole.jsx
+    │   └── layouts/
+    │       └── DashboardLayout.jsx
+    │
+    ├── pages/
+    │   ├── Landing.jsx
+    │   ├── Jobs.jsx
+    │   ├── jobs/
+    │   │   └── JobDetail.jsx
+    │   │
+    │   ├── auth/
+    │   │   ├── Login.jsx
+    │   │   └── Register.jsx
+    │   │
+    │   ├── candidate/
+    │   │   ├── Dashboard.jsx
+    │   │   ├── Profile.jsx
+    │   │   ├── ViewProfile.jsx
+    │   │   ├── Applications.jsx
+    │   │   └── SavedJobs.jsx
+    │   │
+    │   ├── employer/
+    │   │   ├── Dashboard.jsx
+    │   │   ├── PostJob.jsx
+    │   │   ├── MyJobs.jsx
+    │   │   ├── ViewApplicants.jsx
+    │   │   └── CandidateProfileView.jsx
+    │   │
+    │   └── admin/
+    │       └── Dashboard.jsx
+    │
+    ├── components/
+    │   └── jobs/
+    │       └── JobCard.jsx
+    │
+    ├── utils/
+    │   ├── profileCompletion.js
+    │   ├── jobBookmarks.js
+    │   ├── jobApplications.js
+    │   └── jobRecommendations.js
+    │
+    └── main.jsx
