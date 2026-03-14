@@ -396,7 +396,7 @@
 
 
 
-
+import { Search, MapPin } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import DashboardLayout from "../app/layouts/DashboardLayout";
@@ -613,7 +613,54 @@ useEffect(() => {
 
   /* ================= UI ================= */
   return (
-    <DashboardLayout title="Jobs">
+    <DashboardLayout>
+      <div className="flex justify-center mb-10 px-4">
+  <div className="flex flex-col md:flex-row items-stretch md:items-center bg-white rounded-2xl shadow-lg p-3 w-full max-w-3xl gap-3 md:gap-0">
+
+    {/* Keyword */}
+    <div className="flex items-center flex-1">
+      <Search className="text-gray-400 mr-2" size={18} />
+
+      <input
+        type="text"
+        placeholder="Skills, job title or company"
+        className="flex-1 outline-none text-sm"
+        value={filters.keyword}
+        onChange={(e) =>
+          setFilters({ ...filters, keyword: e.target.value })
+        }
+      />
+    </div>
+
+    {/* Divider Desktop */}
+    <div className="hidden md:block h-6 w-px bg-gray-300 mx-3"></div>
+
+    {/* Location */}
+    <div className="flex items-center flex-1">
+      <MapPin className="text-gray-400 mr-2" size={18} />
+
+      <input
+        type="text"
+        placeholder="Location"
+        className="flex-1 outline-none text-sm"
+        value={filters.location}
+        onChange={(e) =>
+          setFilters({ ...filters, location: e.target.value })
+        }
+      />
+    </div>
+
+    {/* Search Button */}
+    <button
+      className="md:ml-4 px-6 py-2 rounded-full text-white font-medium w-full md:w-auto"
+      style={{ background: "linear-gradient(90deg,#ff0066,#8000ff)" }}
+    >
+      Search
+    </button>
+
+  </div>
+</div>
+
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
         {/* FILTER PANEL */}
@@ -638,15 +685,6 @@ useEffect(() => {
   >
     Clear Filters
   </button>
-          <input
-            className="border p-2 w-full text-sm"
-            placeholder="Search job, company, location"
-            value={filters.keyword}
-            onChange={(e) =>
-              setFilters({ ...filters, keyword: e.target.value })
-            }
-          />
-
           <select
             className="border p-2 w-full text-sm"
             value={filters.industry}

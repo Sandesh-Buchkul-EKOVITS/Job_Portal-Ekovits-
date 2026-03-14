@@ -97,6 +97,7 @@ const handleRegister = async (e) => {
         email: form.email,
         password: form.password,
         name: form.name,
+        contact: form.contact
       }),
     });
 
@@ -104,13 +105,28 @@ const handleRegister = async (e) => {
     const redirectPath = location.state?.from || null;
 
     if (data.success) {
+      localStorage.setItem("token", data.token);
+       localStorage.setItem("currentUser", JSON.stringify({
+    ...data.user,
+    contact: form.contact
+  }));
+
       alert("Registered successfully");
-      navigate("/login", {
-  state: {
-    role: "candidate",
-    from: redirectPath
+       if (redirectPath) {
+    navigate(redirectPath);
+  } else {
+    navigate("/jobs");
   }
-});
+
+      // DIRECT JOBS PAGE
+     // navigate("/jobs");
+      //alert("Registered successfully");
+   //   navigate("/login", {
+  //state: {
+   // role: "candidate",
+   // from: redirectPath
+//  }
+//});
     } else {
       alert(data.message);
     }

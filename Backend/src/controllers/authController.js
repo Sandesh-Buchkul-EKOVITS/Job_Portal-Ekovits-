@@ -117,12 +117,12 @@ const jwt = require("jsonwebtoken");
 const sendOtpEmail = require("../utils/SendEmail");
 
 /* ================= REGISTER ================= */
-
 exports.register = async (req, res) => {
-  // const { role, email, password, name } = req.body;
+
   const { role, email, password, name, companyName, phone, industry, companySize } = req.body;
 
   try {
+
     const existing = await pool.query(
       "SELECT * FROM users WHERE email=$1",
       [email]
@@ -134,40 +134,56 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    
+    const newUser = await pool.query(
+      "INSERT INTO users (role, email, password, name) VALUES ($1,$2,$3,$4) RETURNING id",
+      [role, email, hashedPassword, name]
+    );
 
-const newUser = await pool.query(
-  "INSERT INTO users (role, email, password, name) VALUES ($1,$2,$3,$4) RETURNING id",
-  [role, email, hashedPassword, name]
-);
+    const userId = newUser.rows[0].id;
 
-if (role === "employer") {
-  await pool.query(
-  `INSERT INTO employer_profile 
-  (employer_id, company_name, phone, industry, company_size)
-  VALUES ($1,$2,$3,$4,$5)`,
-  [
-    newUser.rows[0].id,
-    companyName,
-    phone,
-    industry,
-    companySize
-  ]
-);
-}
+    /* EMPLOYER PROFILE */
+    if (role === "employer") {
+      await pool.query(
+        `INSERT INTO employer_profile 
+        (employer_id, company_name, phone, industry, company_size)
+        VALUES ($1,$2,$3,$4,$5)`,
+        [
+          userId,
+          companyName,
+          phone,
+          industry,
+          companySize
+        ]
+      );
+    }
 
-   
+    /* 🔐 TOKEN GENERATE */
+    const token = jwt.sign(
+      {
+        id: userId,
+        role: role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
-    res.json({ success: true, message: "Registered successfully" });
+    /* RESPONSE */
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: userId,
+        email: email,
+        role: role,
+        name: name
+      }
+    });
 
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false });
   }
 };
-
-
-
 
 /* ================= LOGIN ================= */
 

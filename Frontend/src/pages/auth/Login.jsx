@@ -245,7 +245,7 @@ const handleLogin = async (e) => {
     return;
   }
 
-  if (role === "candidate") navigate("/candidate/profile");
+  if (role === "candidate") navigate("/jobs");
   if (role === "employer") navigate("/employer/dashboard");
   if (role === "admin") navigate("/admin/dashboard");
 };

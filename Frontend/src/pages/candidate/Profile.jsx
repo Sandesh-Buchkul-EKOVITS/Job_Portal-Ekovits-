@@ -174,15 +174,17 @@ const success = await saveCandidateProfile(draft);
        <Field
   label="Email"
   value={draft.email}
-  editMode={editMode}
-  onChange={(v) => setDraft({ ...draft, email: v })}
+  readOnly
+  //editMode={editMode}
+  //onChange={(v) => setDraft({ ...draft, email: v })}
 />
 
         <Field
           label="Mobile"
           value={draft.contact}
-          editMode={editMode}
-          onChange={(v) => setDraft({ ...draft, contact: v })}
+          readOnly
+          //editMode={editMode}
+          //onChange={(v) => setDraft({ ...draft, contact: v })}
         />
 
         <Field
